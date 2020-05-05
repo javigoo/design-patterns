@@ -3,7 +3,7 @@ package simple;
 import common.DependencyException;
 import implementations.ImplementationD1;
 import interfaces.InterfaceD;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
