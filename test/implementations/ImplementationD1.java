@@ -7,5 +7,9 @@ public class ImplementationD1 implements InterfaceD {
     public ImplementationD1(int i) {
         this.i = i;
     }
+
+    public int getI() {
+        return this.i;
+    }
     // ....
 }
