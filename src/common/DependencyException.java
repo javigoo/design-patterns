@@ -2,6 +2,11 @@ package common;
 
 public class DependencyException extends Exception {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+
     public DependencyException(Exception cause) {
         super(cause);
     }
