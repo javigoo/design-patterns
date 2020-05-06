@@ -7,19 +7,22 @@ import java.util.HashMap;
 public class Container implements Injector {
 
     private HashMap<Class, Object> registeredObjects;
+    private HashMap<Class, complex.Factory> factoriesMap;
+    private HashMap<Class, Class[]> dependenciesMap;
 
-    public Container(){
+    public Container() {
         this.registeredObjects = new HashMap<>();
+        this.factoriesMap = new HashMap<>();
+        this.dependenciesMap = new HashMap<>();
 
     }
 
     /**
      * Associa el nom al valor, de manera que quan es demani getObject donat el nom, es retornarà aquest valor
      *
-     * @param name
-     * @param value
-     * @param <E>
-     * @throws DependencyException
+     * @param name  Nom constant
+     * @param value Valor constant
+     * @throws DependencyException Si ja té una constant enregistrat
      */
     public <E> void registerConstant(Class<E> name, E value) throws DependencyException {
         if (this.registeredObjects.containsKey(name)) {
@@ -34,14 +37,19 @@ public class Container implements Injector {
      * s’usarà la instància enregistrada de factoria (a la que se li passaran com arguments els objectes creats,
      * pel mateix contenidor, amb els noms indicats al vector de paràmetres) per a crear la nova instància.
      *
-     * @param name
-     * @param creator
-     * @param parameters
-     * @param <E>
-     * @throws DependencyException
+     * @param name Nom factoria
+     * @param creator Objectes creats
+     * @param parameters Noms objectes
+     *
+     * @throws DependencyException Si ja té una factoria enregistrada
      */
     public <E> void registerFactory(Class<E> name, Factory<? extends E> creator, Class<?>... parameters) throws DependencyException {
-
+        if (this.factoriesMap.containsKey(name)) {
+            throw new DependencyException(name + " ja té una factoria enregistrada");
+        } else {
+            this.factoriesMap.put(name, creator);
+            this.dependenciesMap.put(name, parameters);
+        }
     }
 
     /**
