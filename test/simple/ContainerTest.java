@@ -13,7 +13,7 @@ public class ContainerTest {
 
     @Test
     public void FactoryD1() throws DependencyException{
-        Injector injector = (Injector) new Container();
+        Injector injector = new Container();
         injector.registerConstant("I", 42);
         injector.registerFactory("D", new FactoryD1(), "I");
         InterfaceD d = (InterfaceD) injector.getObject("D");
