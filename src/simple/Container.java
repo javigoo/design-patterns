@@ -10,6 +10,7 @@ public class Container implements Injector{
     private HashMap<String,Object> registeredObjects;
     private HashMap<String,simple.Factory> FactoriesMap;
     private HashMap<String,simple.Factory> SingletonMap;
+    private HashMap<String,Object> SingletonInstanceMap;
     private HashMap<String,String[]> dependencesMap;
     private boolean DEBUG = true;
 
@@ -92,21 +93,19 @@ public class Container implements Injector{
 
     private Object getSingletonFactory(String name) throws DependencyException {
         try{
-            if (instance == null){
+            if (SingletonInstanceMap.get(name)==null){
                 Factory creator;
-                creator = this.FactoriesMap.get(name);
+                creator = this.SingletonMap.get(name);     
                 Object[] str1 = new Object[this.dependencesMap.get(name).length];
                 for (int i=0; i<this.dependencesMap.get(name).length; i++){
                     str1[i] = this.getObject(this.dependencesMap.get(name)[i]);
                 }
-                return creator.create(str1);
-            }else{
-                return instance;
+                SingletonInstanceMap.put(name, creator.create(str1));
             }
-            
+            return SingletonInstanceMap.get(name);
         }catch(DependencyException ex){
-                if (DEBUG) System.err.println("ERROR: Something whent wrong trying to make '" + name + "' factory");
-                throw new DependencyException(ex);
+            if (DEBUG) System.err.println("ERROR: Something whent wrong trying to make '" + name + "' factory");
+            throw new DependencyException(ex);
         }
     }
 
@@ -118,7 +117,7 @@ public class Container implements Injector{
             for (int i=0; i<this.dependencesMap.get(name).length; i++){
                 str1[i] = this.getObject(this.dependencesMap.get(name)[i]);
             }
-            return creator.create(str1);
+            return creator.create(str1);    // Nos retorna una nueva instancia de esa Factory con los parámetros asignados.
         }catch(DependencyException ex){
                 if (DEBUG) System.err.println("ERROR: Something whent wrong trying to make '" + name + "' factory");
                 throw new DependencyException(ex);
