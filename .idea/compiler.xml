@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_STRING" value="–Xlint:unchecked" />
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="design-patterns" options="--add-exports java.base/sun.nio.cs=ALL-UNNAMED" />
     </option>
