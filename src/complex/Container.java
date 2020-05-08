@@ -2,6 +2,7 @@ package complex;
 
 import common.DependencyException;
 
+import javax.swing.*;
 import java.util.HashMap;
 
 public class Container implements Injector {
@@ -56,18 +57,17 @@ public class Container implements Injector {
      * Associa el nom a la factoria de manera que quan es demani per primera vegada getObject donat aquest nom,
      * s’usarà la instància enregistrada de factoria (a la que se li passaran com arguments els objectes creats,
      * pel mateix contenidor, amb els noms indicats al vector de paràmetres) per a crear la nova instància.
-     * <p>
+     *
      * A partir d’aquest moment, les subseqüents crides a getObject donat aquest nom retornaran la mateixa
      * instància creada.
-     * <p>
+     *
      * Fixeu-vos que en el moment de fer l’enregistrament no podem crear la instància, doncs podria ser que no
      * totes les dependències estiguin ja enregistrades.
      *
-     * @param name
-     * @param creator
-     * @param parameters
-     * @param <E>
-     * @throws DependencyException
+     * @param name          Nom Singleton
+     * @param creator       Objectes creats
+     * @param parameters    Noms objectes
+     * @throws DependencyException Si ja té un singleton enregistrat
      */
     public <E> void registerSingleton(Class<E> name, Factory<? extends E> creator, Class<?>... parameters) throws DependencyException {
         if (alreadyRegistered(name)) {
@@ -83,7 +83,7 @@ public class Container implements Injector {
      * (o es crea, mitjançant el mecanisme explicat anteriorment) l’objecte associat al nom.
      *
      * @param name Nom objecte
-     * @throws DependencyException
+     * @throws DependencyException Si el nom no està té enregistrat
      */
     public <E> E getObject(Class<E> name) throws DependencyException {
         if (this.constants.containsKey(name)) {
@@ -91,8 +91,7 @@ public class Container implements Injector {
         } else if (this.factories.containsKey(name)) {
             return (E) this.makeFactory(name);
         } else if (this.singletons.containsKey(name)) {
-            System.out.println("Not implemented yet");
-            return null;
+            return (E) this.makeSingleton(name);
         } else {
             throw new DependencyException(name + " no enregistrat");
         }
@@ -111,6 +110,14 @@ public class Container implements Injector {
                 str1[i] = this.getObject(this.dependencies.get(name)[i]);
             }
             return creator.create(str1);
+        } catch (DependencyException ex) {
+            throw new DependencyException(ex);
+        }
+    }
+
+    private <E> Object makeSingleton(Class<E> name) throws DependencyException {
+        try {
+            System.out.println("Not implemented yet");
         } catch (DependencyException ex) {
             throw new DependencyException(ex);
         }
