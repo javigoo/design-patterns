@@ -117,7 +117,16 @@ public class Container implements Injector {
 
     private <E> Object makeSingleton(Class<E> name) throws DependencyException {
         try {
-            System.out.println("Not implemented yet");
+            if (singletons.get(name)==null){
+                complex.Factory creator;
+                creator = this.singletons.get(name);
+                Object[] str1 = new Object[this.dependencies.get(name).length];
+                for (int i=0; i<this.dependencies.get(name).length; i++){
+                    str1[i] = this.getObject(this.dependencies.get(name)[i]);
+                }
+                singletons.put(name, (Factory) creator.create(str1));
+            }
+            return singletons.get(name);
         } catch (DependencyException ex) {
             throw new DependencyException(ex);
         }
