@@ -10,6 +10,7 @@ public class Container implements Injector{
     private HashMap<String,Object> registeredObjects;
     private HashMap<String,simple.Factory> FactoriesMap;
     private HashMap<String,simple.Factory> SingletonMap;
+    private HashMap<String,Object> SingletonInstanceMap;
     private HashMap<String,String[]> dependencesMap;
     private boolean DEBUG = true;
 
@@ -63,15 +64,15 @@ public class Container implements Injector{
         // totes les dependències estiguin ja enregistrades.
 
         if (this.FactoriesMap.containsKey(name) || this.registeredObjects.containsKey(name) || this.SingletonMap.containsKey(name)){  // Comprueba si el nombre se encuentra en algon HashMap
-            if (DEBUG) System.err.println("ERROR: '" + name + "' factory is already registered.");
-            throw new DependencyException(name + " factory is already registered.");
+            if (DEBUG) System.err.println("ERROR: '" + name + "' singleton is already registered.");
+            throw new DependencyException(name + " singleton is already registered.");
         }else{
             if (DEBUG) System.out.println("Trying to register a factory like Singleton with name: '" + name + "'");
             this.SingletonMap.put(name, creator);
-            if (DEBUG) System.out.println("Successfull factory register with FactoryName: '" + name + "'");
-            if (DEBUG) System.out.println("Trying to register a factory dependences with FactoryName: '" + name + "'");
+            if (DEBUG) System.out.println("Successfull singleton register with SingletonName: '" + name + "'");
+            if (DEBUG) System.out.println("Trying to register a singleton dependences with SingletonName: '" + name + "'");
             this.dependencesMap.put(name, parameters);
-            if (DEBUG) System.out.println("Successfull dependences register for Factory: '" + name + "'");
+            if (DEBUG) System.out.println("Successfull dependences register for Singleton: '" + name + "'");
         }
     }
 
@@ -91,28 +92,21 @@ public class Container implements Injector{
     }
 
     private Object getSingletonFactory(String name) throws DependencyException {
-        /**
         try{
-            if (instance == null){
+            if (SingletonInstanceMap.get(name)==null){
                 Factory creator;
-                creator = this.FactoriesMap.get(name);
+                creator = this.SingletonMap.get(name);     
                 Object[] str1 = new Object[this.dependencesMap.get(name).length];
                 for (int i=0; i<this.dependencesMap.get(name).length; i++){
                     str1[i] = this.getObject(this.dependencesMap.get(name)[i]);
                 }
-                return creator.create(str1);
-            }else{
-                return instance;
+                SingletonInstanceMap.put(name, creator.create(str1));
             }
-
-            return null;
-            
+            return SingletonInstanceMap.get(name);
         }catch(DependencyException ex){
-                if (DEBUG) System.err.println("ERROR: Something whent wrong trying to make '" + name + "' factory");
-                throw new DependencyException(ex);
+            if (DEBUG) System.err.println("ERROR: Something whent wrong trying to make '" + name + "' singleton factory");
+            throw new DependencyException(ex);
         }
-         **/
-        return null;
     }
 
     private Object makeFactory(String name) throws DependencyException { // Cada vez que pedimos ese nombre, nos crea una instancia de Factory.
@@ -123,7 +117,7 @@ public class Container implements Injector{
             for (int i=0; i<this.dependencesMap.get(name).length; i++){
                 str1[i] = this.getObject(this.dependencesMap.get(name)[i]);
             }
-            return creator.create(str1);
+            return creator.create(str1);    // Nos retorna una nueva instancia de esa Factory con los parámetros asignados.
         }catch(DependencyException ex){
                 if (DEBUG) System.err.println("ERROR: Something whent wrong trying to make '" + name + "' factory");
                 throw new DependencyException(ex);
