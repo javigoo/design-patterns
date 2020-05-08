@@ -6,14 +6,16 @@ import java.util.HashMap;
 
 public class Container implements Injector {
 
-    private HashMap<Class, Object> registeredObjects;
-    private HashMap<Class, complex.Factory> factoriesMap;
-    private HashMap<Class, Class[]> dependenciesMap;
+    private HashMap<Class, Object> constants;
+    private HashMap<Class, complex.Factory> factories;
+    private HashMap<Class, complex.Factory> singletons;
+    private HashMap<Class, Class[]> dependencies;
 
-    public Container() {
-        this.registeredObjects = new HashMap<>();
-        this.factoriesMap = new HashMap<>();
-        this.dependenciesMap = new HashMap<>();
+    public Container() throws DependencyException {
+        this.constants = new HashMap<>();
+        this.factories = new HashMap<>();
+        this.singletons = new HashMap<>();
+        this.dependencies = new HashMap<>();
 
     }
 
@@ -25,11 +27,10 @@ public class Container implements Injector {
      * @throws DependencyException Si ja té una constant enregistrat
      */
     public <E> void registerConstant(Class<E> name, E value) throws DependencyException {
-        if (this.registeredObjects.containsKey(name)) {
-            throw new DependencyException(name + " ja té una constant enregistrat");
+        if (alreadyRegistered(name)) {
+            throw new DependencyException(name + " ja té una constant enregistrada");
         }
-        this.registeredObjects.put(name, value);
-
+        this.constants.put(name, value);
     }
 
     /**
@@ -37,18 +38,17 @@ public class Container implements Injector {
      * s’usarà la instància enregistrada de factoria (a la que se li passaran com arguments els objectes creats,
      * pel mateix contenidor, amb els noms indicats al vector de paràmetres) per a crear la nova instància.
      *
-     * @param name Nom factoria
-     * @param creator Objectes creats
+     * @param name       Nom factoria
+     * @param creator    Objectes creats
      * @param parameters Noms objectes
-     *
      * @throws DependencyException Si ja té una factoria enregistrada
      */
     public <E> void registerFactory(Class<E> name, Factory<? extends E> creator, Class<?>... parameters) throws DependencyException {
-        if (this.factoriesMap.containsKey(name)) {
+        if (alreadyRegistered(name)) {
             throw new DependencyException(name + " ja té una factoria enregistrada");
         } else {
-            this.factoriesMap.put(name, creator);
-            this.dependenciesMap.put(name, parameters);
+            this.factories.put(name, creator);
+            this.dependencies.put(name, parameters);
         }
     }
 
@@ -56,10 +56,10 @@ public class Container implements Injector {
      * Associa el nom a la factoria de manera que quan es demani per primera vegada getObject donat aquest nom,
      * s’usarà la instància enregistrada de factoria (a la que se li passaran com arguments els objectes creats,
      * pel mateix contenidor, amb els noms indicats al vector de paràmetres) per a crear la nova instància.
-     *
+     * <p>
      * A partir d’aquest moment, les subseqüents crides a getObject donat aquest nom retornaran la mateixa
      * instància creada.
-     *
+     * <p>
      * Fixeu-vos que en el moment de fer l’enregistrament no podem crear la instància, doncs podria ser que no
      * totes les dependències estiguin ja enregistrades.
      *
@@ -70,7 +70,12 @@ public class Container implements Injector {
      * @throws DependencyException
      */
     public <E> void registerSingleton(Class<E> name, Factory<? extends E> creator, Class<?>... parameters) throws DependencyException {
-
+        if (alreadyRegistered(name)) {
+            throw new DependencyException(name + " ja té un singleton enregistrat");
+        } else {
+            this.singletons.put(name, creator);
+            this.dependencies.put(name, parameters);
+        }
     }
 
     /**
@@ -78,31 +83,35 @@ public class Container implements Injector {
      * (o es crea, mitjançant el mecanisme explicat anteriorment) l’objecte associat al nom.
      *
      * @param name Nom objecte
-     *
      * @throws DependencyException
      */
     public <E> E getObject(Class<E> name) throws DependencyException {
-        if (this.registeredObjects.containsKey(name)){
-            return (E) this.registeredObjects.get(name);
-        }
-        else if(this.factoriesMap.containsKey(name)){
+        if (this.constants.containsKey(name)) {
+            return (E) this.constants.get(name);
+        } else if (this.factories.containsKey(name)) {
             return (E) this.makeFactory(name);
-        }
-        else{
+        } else if (this.singletons.containsKey(name)) {
+            System.out.println("Not implemented yet");
+            return null;
+        } else {
             throw new DependencyException(name + " no enregistrat");
         }
     }
 
-    private <E> Object makeFactory(Class<E> name) throws DependencyException{
-        try{
+    private <E> boolean alreadyRegistered(Class<E> name) {
+        return this.constants.containsKey(name) || this.factories.containsKey(name) || this.singletons.containsKey(name);
+    }
+
+    private <E> Object makeFactory(Class<E> name) throws DependencyException {
+        try {
             complex.Factory creator;
-            creator = this.factoriesMap.get(name);
-            Object[] str1 = new Object[this.dependenciesMap.get(name).length];
-            for (int i=0; i<this.dependenciesMap.get(name).length; i++){
-                str1[i] = this.getObject(this.dependenciesMap.get(name)[i]);
+            creator = this.factories.get(name);
+            Object[] str1 = new Object[this.dependencies.get(name).length];
+            for (int i = 0; i < this.dependencies.get(name).length; i++) {
+                str1[i] = this.getObject(this.dependencies.get(name)[i]);
             }
             return creator.create(str1);
-        }catch(DependencyException ex){
+        } catch (DependencyException ex) {
             throw new DependencyException(ex);
         }
     }

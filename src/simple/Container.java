@@ -91,6 +91,7 @@ public class Container implements Injector{
     }
 
     private Object getSingletonFactory(String name) throws DependencyException {
+        /**
         try{
             if (instance == null){
                 Factory creator;
@@ -103,11 +104,15 @@ public class Container implements Injector{
             }else{
                 return instance;
             }
+
+            return null;
             
         }catch(DependencyException ex){
                 if (DEBUG) System.err.println("ERROR: Something whent wrong trying to make '" + name + "' factory");
                 throw new DependencyException(ex);
         }
+         **/
+        return null;
     }
 
     private Object makeFactory(String name) throws DependencyException { // Cada vez que pedimos ese nombre, nos crea una instancia de Factory.
