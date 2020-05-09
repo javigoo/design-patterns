@@ -5,11 +5,11 @@ import java.util.HashMap;
 
 public class Container implements Injector {
 
-    private HashMap<Class, Object> constants;
-    private HashMap<Class, complex.Factory> factories;
-    private HashMap<Class, complex.Factory> singletons;
-    private HashMap<Class, Object> singletonInstances;
-    private HashMap<Class, Class[]> dependencies;
+    private HashMap<Class<?>, Object> constants;
+    private HashMap<Class<?>, complex.Factory<?>> factories;
+    private HashMap<Class<?>, complex.Factory<?>> singletons;
+    private HashMap<Class<?>, Object> singletonInstances;
+    private HashMap<Class<?>, Class<?>[]> dependencies;
 
     public Container() {
         this.constants = new HashMap<>();
@@ -85,14 +85,13 @@ public class Container implements Injector {
      * @param name Nom objecte
      * @throws DependencyException Si el nom no està té enregistrat
      */
-    public <E> E getObject(Class<E> name) throws DependencyException {
+    public <E> Object getObject(Class<E> name) throws DependencyException {
         if (this.constants.containsKey(name)) {
-            System.out.println("\nCONSTANT\n");
-            return (E) this.constants.get(name);
+            return this.constants.get(name);
         } else if (this.factories.containsKey(name)) {
-            return (E) this.makeFactory(name);
+            return this.makeFactory(name);
         } else if (this.singletons.containsKey(name)) {
-            return (E) this.getSingleton(name);
+            return this.getSingleton(name);
         } else {
             throw new DependencyException(name + " no enregistrat");
         }
@@ -104,7 +103,7 @@ public class Container implements Injector {
 
     private <E> Object makeFactory(Class<E> name) throws DependencyException {
         try {
-            complex.Factory creator;
+            complex.Factory<?> creator;
             creator = this.factories.get(name);
             Object[] str1 = new Object[this.dependencies.get(name).length];
             for (int i = 0; i < this.dependencies.get(name).length; i++) {
@@ -119,13 +118,13 @@ public class Container implements Injector {
     private <E> Object getSingleton(Class<E> name) throws DependencyException {
         try {
             if (singletons.get(name)==null){
-                complex.Factory creator;
+                complex.Factory<?> creator;
                 creator = this.singletons.get(name);
                 Object[] str1 = new Object[this.dependencies.get(name).length];
                 for (int i=0; i<this.dependencies.get(name).length; i++){
                     str1[i] = this.getObject(this.dependencies.get(name)[i]);
                 }
-                singletonInstances.put(name, (Factory) creator.create(str1));
+                singletonInstances.put(name, creator.create(str1));
             }
             return singletonInstances.get(name);
         } catch (DependencyException ex) {
