@@ -10,12 +10,14 @@ public class Container implements Injector {
     private HashMap<Class, Object> constants;
     private HashMap<Class, complex.Factory> factories;
     private HashMap<Class, complex.Factory> singletons;
+    private HashMap<Class, Object> singletonInstances;
     private HashMap<Class, Class[]> dependencies;
 
     public Container() throws DependencyException {
         this.constants = new HashMap<>();
         this.factories = new HashMap<>();
         this.singletons = new HashMap<>();
+        this.singletonInstances = new HashMap<>();
         this.dependencies = new HashMap<>();
 
     }
@@ -91,7 +93,7 @@ public class Container implements Injector {
         } else if (this.factories.containsKey(name)) {
             return (E) this.makeFactory(name);
         } else if (this.singletons.containsKey(name)) {
-            return (E) this.makeSingleton(name);
+            return (E) this.getSingleton(name);
         } else {
             throw new DependencyException(name + " no enregistrat");
         }
@@ -115,7 +117,7 @@ public class Container implements Injector {
         }
     }
 
-    private <E> Object makeSingleton(Class<E> name) throws DependencyException {
+    private <E> Object getSingleton(Class<E> name) throws DependencyException {
         try {
             if (singletons.get(name)==null){
                 complex.Factory creator;
@@ -124,9 +126,9 @@ public class Container implements Injector {
                 for (int i=0; i<this.dependencies.get(name).length; i++){
                     str1[i] = this.getObject(this.dependencies.get(name)[i]);
                 }
-                singletons.put(name, (Factory) creator.create(str1));
+                singletonInstances.put(name, (Factory) creator.create(str1));
             }
-            return singletons.get(name);
+            return singletonInstances.get(name);
         } catch (DependencyException ex) {
             throw new DependencyException(ex);
         }

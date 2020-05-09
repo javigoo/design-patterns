@@ -84,14 +84,14 @@ public class Container implements Injector{
             return this.makeFactory(name);            
         }
         else if(this.SingletonMap.containsKey(name)){
-            return this.getSingletonFactory(name);            
+            return this.getSingleton(name);            
         }
         else{
             throw new DependencyException(name + " has not been registered.");
         }        
     }
 
-    private Object getSingletonFactory(String name) throws DependencyException {
+    private Object getSingleton(String name) throws DependencyException {
         try{
             if (SingletonInstanceMap.get(name)==null){
                 Factory creator;
