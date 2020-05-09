@@ -25,7 +25,7 @@ public class ContainerTest {
         injector.registerConstant(Integer.class, 42);
         injector.registerConstant(String.class, "El sentido de la vida, el universo y todo lo demas");
 
-        injector.registerFactory(InterfaceA.class, new FactoryA1(), InterfaceB.class,InterfaceC.class);
+        injector.registerFactory(InterfaceA.class, new FactoryA1(), InterfaceB.class, InterfaceC.class);
         injector.registerFactory(InterfaceB.class, new FactoryB1(), InterfaceD.class);
         injector.registerFactory(InterfaceC.class, new FactoryC1(), String.class);
         injector.registerFactory(InterfaceD.class, new FactoryD1(), Integer.class);
@@ -96,10 +96,20 @@ public class ContainerTest {
         injector.registerSingleton(InterfaceD.class, new FactoryD1(), Integer.class);
     }
 
+    @Test(expected = DependencyException.class)
+    public void getObjectNotRegisteredName() throws DependencyException{
+        injector.getObject(Integer.class);
+    }
+
+    @Test(expected = DependencyException.class)
+    public void registerFactoryWithBadArguments() throws DependencyException{
+        injector.registerConstant(Integer.class, 0);
+        injector.registerFactory(InterfaceD.class, new FactoryD1(), String.class);
+        injector.getObject(InterfaceD.class);
+    }
 
 
     // TODO
-    //
     // Repetir test para cada factory (ok)
     // DependencyException:
     // • Enregistrar un nom que ja té una constant / factoria / singleton enregistrat (ok)

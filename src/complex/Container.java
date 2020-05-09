@@ -87,6 +87,7 @@ public class Container implements Injector {
      */
     public <E> E getObject(Class<E> name) throws DependencyException {
         if (this.constants.containsKey(name)) {
+            System.out.println("\nCONSTANT\n");
             return (E) this.constants.get(name);
         } else if (this.factories.containsKey(name)) {
             return (E) this.makeFactory(name);
