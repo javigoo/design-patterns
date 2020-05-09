@@ -11,7 +11,7 @@ public class Container implements Injector {
     private HashMap<Class, Object> singletonInstances;
     private HashMap<Class, Class[]> dependencies;
 
-    public Container() throws DependencyException {
+    public Container() {
         this.constants = new HashMap<>();
         this.factories = new HashMap<>();
         this.singletons = new HashMap<>();
