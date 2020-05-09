@@ -18,6 +18,6 @@ public interface Injector {
                            Class<?>... parameters)
             throws DependencyException;
 
-    <E> Object getObject(Class<E> name)
+    <E> E getObject(Class<E> name)
             throws DependencyException;
 }

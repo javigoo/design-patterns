@@ -85,13 +85,13 @@ public class Container implements Injector {
      * @param name Nom objecte
      * @throws DependencyException Si el nom no està té enregistrat
      */
-    public <E> Object getObject(Class<E> name) throws DependencyException {
+    public <E> E getObject(Class<E> name) throws DependencyException {
         if (this.constants.containsKey(name)) {
-            return this.constants.get(name);
+            return (E) this.constants.get(name);
         } else if (this.factories.containsKey(name)) {
-            return this.makeFactory(name);
+            return (E) this.makeFactory(name);
         } else if (this.singletons.containsKey(name)) {
-            return this.getSingleton(name);
+            return (E) this.getSingleton(name);
         } else {
             throw new DependencyException(name + " no enregistrat");
         }

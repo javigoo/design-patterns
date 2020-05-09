@@ -30,7 +30,7 @@ public class ContainerTest {
         injector.registerFactory(InterfaceC.class, new FactoryC1(), String.class);
         injector.registerFactory(InterfaceD.class, new FactoryD1(), Integer.class);
 
-        InterfaceA a = (InterfaceA) injector.getObject(InterfaceA.class);
+        InterfaceA a = injector.getObject(InterfaceA.class);
         assertThat(a, is(instanceOf(ImplementationA1.class)));
 
         ImplementationA1 a1 = (ImplementationA1) a;
@@ -45,7 +45,7 @@ public class ContainerTest {
         injector.registerFactory(InterfaceB.class, new FactoryB1(), InterfaceD.class);
         injector.registerFactory(InterfaceD.class, new FactoryD1(), Integer.class);
 
-        InterfaceB b = (InterfaceB) injector.getObject(InterfaceB.class);
+        InterfaceB b = injector.getObject(InterfaceB.class);
         assertThat(b, is(instanceOf(ImplementationB1.class)));
 
         ImplementationB1 b1 = (ImplementationB1) b;
@@ -58,7 +58,7 @@ public class ContainerTest {
 
         injector.registerFactory(InterfaceC.class, new FactoryC1(), String.class);
 
-        InterfaceC c = (InterfaceC) injector.getObject(InterfaceC.class);
+        InterfaceC c = injector.getObject(InterfaceC.class);
         assertThat(c, is(instanceOf(ImplementationC1.class)));
 
         ImplementationC1 c1 = (ImplementationC1) c;
@@ -71,7 +71,7 @@ public class ContainerTest {
 
         injector.registerFactory(InterfaceD.class, new FactoryD1(), Integer.class);
 
-        InterfaceD d = (InterfaceD) injector.getObject(InterfaceD.class);
+        InterfaceD d = injector.getObject(InterfaceD.class);
         assertThat(d, is(instanceOf(ImplementationD1.class)));
 
         ImplementationD1 d1 = (ImplementationD1) d;
