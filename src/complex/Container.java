@@ -1,8 +1,6 @@
 package complex;
 
 import common.DependencyException;
-
-import javax.swing.*;
 import java.util.HashMap;
 
 public class Container implements Injector {

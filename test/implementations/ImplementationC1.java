@@ -7,5 +7,9 @@ public class ImplementationC1 implements InterfaceC {
     public ImplementationC1(String s) {
         this.s = s;
     }
+
+    public String getS() {
+        return this.s;
+    }
     // ....
 }
