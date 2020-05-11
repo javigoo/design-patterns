@@ -1,17 +1,17 @@
-package simple;
+package complex;
 
 import common.DependencyException;
+import complex.factories.*;
 import implementations.*;
 import interfaces.*;
 import org.junit.Before;
 import org.junit.Test;
-import simple.factories.*;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class ContainerTest {
+public class ComplexContainerTest {
 
     private Injector injector;
 
@@ -21,11 +21,11 @@ public class ContainerTest {
     }
 
     @Test
-    public void containerFactoryA1() throws DependencyException {
+    public void instanceOfFactoryA1() throws DependencyException {
         registerConstants();
         registerFactories();
 
-        InterfaceA a = (InterfaceA) injector.getObject("InterfaceA");
+        InterfaceA a = injector.getObject(InterfaceA.class);
         assertThat(a, is(instanceOf(ImplementationA1.class)));
 
         ImplementationA1 a1 = (ImplementationA1) a;
@@ -34,11 +34,11 @@ public class ContainerTest {
     }
 
     @Test
-    public void containerFactoryB1() throws DependencyException {
+    public void instanceOfFactoryB1() throws DependencyException {
         registerConstants();
         registerFactories();
 
-        InterfaceB b = (InterfaceB) injector.getObject("InterfaceB");
+        InterfaceB b = injector.getObject(InterfaceB.class);
         assertThat(b, is(instanceOf(ImplementationB1.class)));
 
         ImplementationB1 b1 = (ImplementationB1) b;
@@ -46,11 +46,11 @@ public class ContainerTest {
     }
 
     @Test
-    public void containerFactoryC1() throws DependencyException {
+    public void instanceOfFactoryC1() throws DependencyException {
         registerConstants();
         registerFactories();
 
-        InterfaceC c = (InterfaceC) injector.getObject("InterfaceC");
+        InterfaceC c = injector.getObject(InterfaceC.class);
         assertThat(c, is(instanceOf(ImplementationC1.class)));
 
         ImplementationC1 c1 = (ImplementationC1) c;
@@ -58,11 +58,11 @@ public class ContainerTest {
     }
 
     @Test
-    public void containerFactoryD1() throws DependencyException {
+    public void instanceOfFactoryD1() throws DependencyException {
         registerConstants();
         registerFactories();
 
-        InterfaceD d = (InterfaceD) injector.getObject("InterfaceD");
+        InterfaceD d = injector.getObject(InterfaceD.class);
         assertThat(d, is(instanceOf(ImplementationD1.class)));
 
         ImplementationD1 d1 = (ImplementationD1) d;
@@ -74,7 +74,7 @@ public class ContainerTest {
         registerConstants();
         registerSingletons();
 
-        InterfaceA a = (InterfaceA) injector.getObject("InterfaceA");
+        InterfaceA a = injector.getObject(InterfaceA.class);
         assertThat(a, is(instanceOf(ImplementationA1.class)));
         ImplementationA1 a1 = (ImplementationA1) a;
         assertThat(a1.b, is(instanceOf(ImplementationB1.class)));
@@ -86,7 +86,7 @@ public class ContainerTest {
         registerConstants();
         registerSingletons();
 
-        InterfaceB b = (InterfaceB) injector.getObject("InterfaceB");
+        InterfaceB b = injector.getObject(InterfaceB.class);
         assertThat(b, is(instanceOf(ImplementationB1.class)));
         ImplementationB1 b1 = (ImplementationB1) b;
         assertThat(b1.d, is(instanceOf(ImplementationD1.class)));
@@ -97,7 +97,7 @@ public class ContainerTest {
         registerConstants();
         registerSingletons();
 
-        InterfaceC c = (InterfaceC) injector.getObject("InterfaceC");
+        InterfaceC c = injector.getObject(InterfaceC.class);
         assertThat(c, is(instanceOf(ImplementationC1.class)));
         ImplementationC1 c1 = (ImplementationC1) c;
         assertThat(c1.s,is("El sentido de la vida, el universo y todo lo demas"));
@@ -108,94 +108,92 @@ public class ContainerTest {
         registerConstants();
         registerSingletons();
 
-        InterfaceD d = (InterfaceD) injector.getObject("InterfaceD");
+        InterfaceD d = injector.getObject(InterfaceD.class);
         assertThat(d, is(instanceOf(ImplementationD1.class)));
         ImplementationD1 d1 = (ImplementationD1) d;
         assertThat(d1.i, is(42));
     }
 
-
     @Test(expected = DependencyException.class)
     public void alreadyRegisteredConstant() throws DependencyException{
-        injector.registerConstant("Integer", 0);
-        injector.registerConstant("Integer", 0);
+        injector.registerConstant(Integer.class, 0);
+        injector.registerConstant(Integer.class, 0);
     }
 
     @Test(expected = DependencyException.class)
     public void alreadyRegisteredFactory() throws DependencyException{
-        injector.registerFactory("InterfaceD", new FactoryD1(), "Integer");
-        injector.registerFactory("InterfaceD", new FactoryD1(), "Integer");
+        injector.registerFactory(InterfaceD.class, new FactoryD1(), Integer.class);
+        injector.registerFactory(InterfaceD.class, new FactoryD1(), Integer.class);
     }
 
     @Test(expected = DependencyException.class)
     public void alreadyRegisteredSingleton() throws DependencyException{
-        injector.registerSingleton("InterfaceD", new FactoryD1(), "Integer");
-        injector.registerSingleton("InterfaceD", new FactoryD1(), "Integer");
+        injector.registerSingleton(InterfaceD.class, new FactoryD1(), Integer.class);
+        injector.registerSingleton(InterfaceD.class, new FactoryD1(), Integer.class);
     }
 
     @Test(expected = DependencyException.class)
     public void getObjectNotRegisteredName() throws DependencyException{
-        injector.getObject("Integer");
+        injector.getObject(InterfaceA.class);
     }
 
     @Test(expected = DependencyException.class)
     public void getObjectNotRegisteredDependenciesFactory() throws DependencyException{
-        injector.registerFactory("InterfaceD", new simple.factories.FactoryD1(), "Integer");
+        injector.registerFactory(InterfaceD.class, new FactoryD1(), Integer.class);
 
-        injector.getObject("InterfaceD");
+        injector.getObject(InterfaceD.class);
     }
 
     @Test(expected = DependencyException.class)
     public void getObjectNotRegisteredDependenciesSingleton() throws DependencyException{
-        injector.registerSingleton("InterfaceD", new simple.factories.FactoryD1(), "Integer");
+        injector.registerSingleton(InterfaceD.class, new FactoryD1(), Integer.class);
 
-        injector.getObject("InterfaceD");
+        injector.getObject(InterfaceD.class);
     }
 
     @Test(expected = DependencyException.class)
     public void registerFactoryWithBadArguments() throws DependencyException{
-        injector.registerConstant("Integer", 0);
-        injector.registerFactory("InterfaceD", new FactoryD1(), "String");
-        injector.getObject("InterfaceD");
-    }
+        injector.registerConstant(Integer.class, 0);
+        injector.registerFactory(InterfaceD.class, new FactoryD1(), String.class);
 
+        injector.getObject(InterfaceD.class);
+    }
 
     @Test(expected = DependencyException.class)
     public void registerSingletonWithBadArguments() throws DependencyException{
-        injector.registerConstant("Integer", 0);
-        injector.registerSingleton("InterfaceD", new simple.factories.FactoryD1(), "String");
+        injector.registerConstant(Integer.class, 0);
+        injector.registerSingleton(InterfaceD.class, new FactoryD1(), String.class);
 
-        injector.getObject("InterfaceD");
+        injector.getObject(InterfaceD.class);
     }
 
     @Test(expected = DependencyException.class)
     public void getObjectWithDependencyCycle() throws DependencyException{
-        injector.registerFactory("InterfaceA", new simple.factories.FactoryA1(), "InterfaceB", "InterfaceC");
-        injector.registerFactory("InterfaceD", new simple.factories.FactoryD1(), "InterfaceA");
-        injector.registerSingleton("InterfaceC", new simple.factories.FactoryC1(), "InterfaceD");
+        injector.registerFactory(InterfaceA.class, new FactoryA1(), InterfaceB.class, InterfaceC.class);
+        injector.registerFactory(InterfaceD.class, new FactoryD1(), InterfaceA.class);
+        injector.registerSingleton(InterfaceC.class, new FactoryC1(), InterfaceD.class);
 
-        injector.getObject("InterfaceA");
+        injector.getObject(InterfaceA.class);
     }
 
 
     private void registerConstants() throws DependencyException {
-        injector.registerConstant("Integer", 42);
-        injector.registerConstant("String", "El sentido de la vida, el universo y todo lo demas");
+        injector.registerConstant(Integer.class, 42);
+        injector.registerConstant(String.class, "El sentido de la vida, el universo y todo lo demas");
     }
 
     private void registerFactories() throws DependencyException {
-        injector.registerFactory("InterfaceA", new simple.factories.FactoryA1(), "InterfaceB", "InterfaceC");
-        injector.registerFactory("InterfaceB", new simple.factories.FactoryB1(), "InterfaceD");
-        injector.registerFactory("InterfaceC", new simple.factories.FactoryC1(), "String");
-        injector.registerFactory("InterfaceD", new simple.factories.FactoryD1(), "Integer");
+        injector.registerFactory(InterfaceA.class, new FactoryA1(), InterfaceB.class, InterfaceC.class);
+        injector.registerFactory(InterfaceB.class, new FactoryB1(), InterfaceD.class);
+        injector.registerFactory(InterfaceC.class, new FactoryC1(), String.class);
+        injector.registerFactory(InterfaceD.class, new FactoryD1(), Integer.class);
     }
 
     private void registerSingletons() throws DependencyException {
-        injector.registerSingleton("InterfaceA", new simple.factories.FactoryA1(), "InterfaceB", "InterfaceC");
-        injector.registerSingleton("InterfaceB", new simple.factories.FactoryB1(), "InterfaceD");
-        injector.registerSingleton("InterfaceC", new simple.factories.FactoryC1(), "String");
-        injector.registerSingleton("InterfaceD", new simple.factories.FactoryD1(), "Integer");
+        injector.registerSingleton(InterfaceA.class, new FactoryA1(), InterfaceB.class, InterfaceC.class);
+        injector.registerSingleton(InterfaceB.class, new FactoryB1(), InterfaceD.class);
+        injector.registerSingleton(InterfaceC.class, new FactoryC1(), String.class);
+        injector.registerSingleton(InterfaceD.class, new FactoryD1(), Integer.class);
     }
-
 
 }
