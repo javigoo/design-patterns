@@ -22,13 +22,8 @@ public class ContainerTest {
 
     @Test
     public void containerFactoryA1() throws DependencyException {
-        injector.registerConstant("cuarentaydos", 42);
-        injector.registerConstant("socrates", "El sentido de la vida, el universo y todo lo demas");
-
-        injector.registerFactory("InterfaceA", new FactoryA1(), "InterfaceB", "InterfaceC");
-        injector.registerFactory("InterfaceB", new FactoryB1(), "InterfaceD");
-        injector.registerFactory("InterfaceC", new FactoryC1(), "socrates");
-        injector.registerFactory("InterfaceD", new FactoryD1(), "cuarentaydos");
+        registerConstants();
+        registerFactories();
 
         InterfaceA a = (InterfaceA) injector.getObject("InterfaceA");
         assertThat(a, is(instanceOf(ImplementationA1.class)));
@@ -40,10 +35,8 @@ public class ContainerTest {
 
     @Test
     public void containerFactoryB1() throws DependencyException {
-        injector.registerConstant("Integer", 42);
-
-        injector.registerFactory("InterfaceB", new FactoryB1(), "InterfaceD");
-        injector.registerFactory("InterfaceD", new FactoryD1(), "Integer");
+        registerConstants();
+        registerFactories();
 
         InterfaceB b = (InterfaceB) injector.getObject("InterfaceB");
         assertThat(b, is(instanceOf(ImplementationB1.class)));
@@ -54,22 +47,20 @@ public class ContainerTest {
 
     @Test
     public void containerFactoryC1() throws DependencyException {
-        injector.registerConstant("String", "GoF");
-
-        injector.registerFactory("InterfaceC", new FactoryC1(), "String");
+        registerConstants();
+        registerFactories();
 
         InterfaceC c = (InterfaceC) injector.getObject("InterfaceC");
         assertThat(c, is(instanceOf(ImplementationC1.class)));
 
         ImplementationC1 c1 = (ImplementationC1) c;
-        assertThat(c1.getS(), is("GoF"));
+        assertThat(c1.getS(), is("El sentido de la vida, el universo y todo lo demas"));
     }
 
     @Test
     public void containerFactoryD1() throws DependencyException {
-        injector.registerConstant("Integer", 42);
-
-        injector.registerFactory("InterfaceD", new FactoryD1(), "Integer");
+        registerConstants();
+        registerFactories();
 
         InterfaceD d = (InterfaceD) injector.getObject("InterfaceD");
         assertThat(d, is(instanceOf(ImplementationD1.class)));
@@ -206,16 +197,5 @@ public class ContainerTest {
         injector.registerSingleton("InterfaceD", new simple.factories.FactoryD1(), "Integer");
     }
 
-    // TODO
-    // Repetir test para cada factory (ok)
-    // DependencyException:
-    // • Enregistrar un nom que ja té una constant / factoria / singleton enregistrat (ok)
-    // • Intentar crear un objecte sota un nom no enregistrat (ok)
-    // • Intentar crear un objecte que no té totes les seves dependències enregistrades
-    // • Intentar crear un objecte que forma part d’un cicle de dependències. Per simplificar, la detecció de
-    //   cicles es realitzarà en el mètode getObject.
-    // • Passar a una factoria un objecte d’un tipus inadequat per a ser utilitzar al constructor de la classe.
-    // Comprobar ciclos de dependencies}
-    // Test singleton
 
 }
