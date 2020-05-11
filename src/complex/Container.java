@@ -8,10 +8,10 @@ import java.util.List;
 
 public class Container implements Injector {
 
-    private HashMap<Class<?>, Object> constants;
-    private HashMap<Class<?>, complex.Factory<?>> factories;
-    private HashMap<Class<?>, complex.Factory<?>> singletons;
-    private HashMap<Class<?>, Class<?>[]> dependencies;
+    private final HashMap<Class<?>, Object> constants;
+    private final HashMap<Class<?>, complex.Factory<?>> factories;
+    private final HashMap<Class<?>, complex.Factory<?>> singletons;
+    private final HashMap<Class<?>, Class<?>[]> dependencies;
 
     public Container() {
         this.constants = new HashMap<>();
@@ -179,11 +179,8 @@ public class Container implements Injector {
      * Si es troba en constants no hi haurà cicle, si no, es comprova si ja s'ha visitat i
      * si cap de les seves dependències posseeix un cicle de dependències.
      *
-     * @param actualName
-     * @param visited
-     * @param <E>
-     * @return true si existe un ciclo de dependencias desde actualName
-     * @throws DependencyException
+     * @param actualName Nom objecte actual
+     * @param visited Objectes visitats
      */
     private <E> boolean existsDependenciesCycle(Class<E> actualName, List<Class<E>> visited) throws DependencyException {
         if (!alreadyRegistered(actualName)) {
