@@ -1,7 +1,7 @@
 package simple;
 
 import common.DependencyException;
-import simple.factories.*;
+import factories.*;
 import implementations.*;
 import interfaces.*;
 import org.junit.Before;
@@ -40,14 +40,12 @@ public class ContainerTest {
 
     @Test
     public void containerFactoryB1() throws DependencyException {
+        injector.registerConstant("Integer", 42);
 
-        injector.registerConstant(Integer.class, 42);
-        injector.registerConstant("I", 42);
+        injector.registerFactory("InterfaceB", new FactoryB1(), "InterfaceD");
+        injector.registerFactory("InterfaceD", new FactoryD1(), "Integer");
 
-        injector.registerFactory(InterfaceB.class, new FactoryB1(), InterfaceD.class);
-        injector.registerFactory(InterfaceD.class, new FactoryD1(), Integer.class);
-
-        InterfaceB b = injector.getObject(InterfaceB.class);
+        InterfaceB b = (InterfaceB) injector.getObject("InterfaceB");
         assertThat(b, is(instanceOf(ImplementationB1.class)));
 
         ImplementationB1 b1 = (ImplementationB1) b;
@@ -56,11 +54,11 @@ public class ContainerTest {
 
     @Test
     public void containerFactoryC1() throws DependencyException {
-        injector.registerConstant(String.class, "GoF");
+        injector.registerConstant("String", "GoF");
 
-        injector.registerFactory(InterfaceC.class, new FactoryC1(), String.class);
+        injector.registerFactory("InterfaceC", new FactoryC1(), "String");
 
-        InterfaceC c = injector.getObject(InterfaceC.class);
+        InterfaceC c = (InterfaceC) injector.getObject("InterfaceC");
         assertThat(c, is(instanceOf(ImplementationC1.class)));
 
         ImplementationC1 c1 = (ImplementationC1) c;
@@ -69,11 +67,11 @@ public class ContainerTest {
 
     @Test
     public void containerFactoryD1() throws DependencyException {
-        injector.registerConstant(Integer.class, 42);
+        injector.registerConstant("Integer", 42);
 
-        injector.registerFactory(InterfaceD.class, new FactoryD1(), Integer.class);
+        injector.registerFactory("InterfaceD", new FactoryD1(), "Integer");
 
-        InterfaceD d = injector.getObject(InterfaceD.class);
+        InterfaceD d = (InterfaceD) injector.getObject("InterfaceD");
         assertThat(d, is(instanceOf(ImplementationD1.class)));
 
         ImplementationD1 d1 = (ImplementationD1) d;
@@ -82,32 +80,32 @@ public class ContainerTest {
 
     @Test(expected = DependencyException.class)
     public void alreadyRegisteredConstant() throws DependencyException{
-        injector.registerConstant(Integer.class, 0);
-        injector.registerConstant(Integer.class, 0);
+        injector.registerConstant("Integer", 0);
+        injector.registerConstant("Integer", 0);
     }
 
     @Test(expected = DependencyException.class)
     public void alreadyRegisteredFactory() throws DependencyException{
-        injector.registerFactory(InterfaceD.class, new FactoryD1(), Integer.class);
-        injector.registerFactory(InterfaceD.class, new FactoryD1(), Integer.class);
+        injector.registerFactory("InterfaceD", new FactoryD1(), "Integer");
+        injector.registerFactory("InterfaceD", new FactoryD1(), "Integer");
     }
 
     @Test(expected = DependencyException.class)
     public void alreadyRegisteredSingleton() throws DependencyException{
-        injector.registerSingleton(InterfaceD.class, new FactoryD1(), Integer.class);
-        injector.registerSingleton(InterfaceD.class, new FactoryD1(), Integer.class);
+        injector.registerSingleton("InterfaceD", new FactoryD1(), "Integer");
+        injector.registerSingleton("InterfaceD", new FactoryD1(), "Integer");
     }
 
     @Test(expected = DependencyException.class)
     public void getObjectNotRegisteredName() throws DependencyException{
-        injector.getObject(Integer.class);
+        injector.getObject("Integer");
     }
 
     @Test(expected = DependencyException.class)
     public void registerFactoryWithBadArguments() throws DependencyException{
-        injector.registerConstant(Integer.class, 0);
-        injector.registerFactory(InterfaceD.class, new FactoryD1(), String.class);
-        injector.getObject(InterfaceD.class);
+        injector.registerConstant("Integer", 0);
+        injector.registerFactory("InterfaceD", new FactoryD1(), "String");
+        injector.getObject("InterfaceD");
     }
 
 
