@@ -58,16 +58,16 @@ public class Container implements Injector {
      * Associa el nom a la factoria de manera que quan es demani per primera vegada getObject donat aquest nom,
      * s’usarà la instància enregistrada de factoria (a la que se li passaran com arguments els objectes creats,
      * pel mateix contenidor, amb els noms indicats al vector de paràmetres) per a crear la nova instància.
-     *
+     * <p>
      * A partir d’aquest moment, les subseqüents crides a getObject donat aquest nom retornaran la mateixa
      * instància creada.
-     *
+     * <p>
      * Fixeu-vos que en el moment de fer l’enregistrament no podem crear la instància, doncs podria ser que no
      * totes les dependències estiguin ja enregistrades.
      *
-     * @param name          Nom Singleton
-     * @param creator       Objectes creats
-     * @param parameters    Noms objectes
+     * @param name       Nom Singleton
+     * @param creator    Objectes creats
+     * @param parameters Noms objectes
      * @throws DependencyException Si ja té un singleton enregistrat
      */
     public <E> void registerSingleton(Class<E> name, Factory<? extends E> creator, Class<?>... parameters) throws DependencyException {
@@ -87,14 +87,14 @@ public class Container implements Injector {
      * @throws DependencyException Si el nom no està té enregistrat
      */
     public <E> E getObject(Class<E> name) throws DependencyException {
-        if(existsDependenciesCycle(name)){
+        if (existsDependenciesCycle(name)) {
             throw new DependencyException("Attempted to create an object which belongs to a dependency cycle");
         }
 
         if (this.constants.containsKey(name)) {
             return (E) this.constants.get(name);
         } else if (this.factories.containsKey(name)) {
-            return (E) this.makeFactory(name);
+            return (E) this.getFactory(name);
         } else if (this.singletons.containsKey(name)) {
             return (E) this.getSingleton(name);
         } else {
@@ -103,57 +103,50 @@ public class Container implements Injector {
     }
 
     /**
-     * Comprueba si el name se encuentra en alguna de las listas.
+     * Comprova si el nom ja està registrat
      *
-     * @param name
-     * @param <E>
-     * @return
+     * @param name Nom objecte
      */
     private <E> boolean alreadyRegistered(Class<E> name) {
         return this.constants.containsKey(name) || this.factories.containsKey(name) || this.singletons.containsKey(name);
     }
 
+
     /**
-     * Crea una nueva instancia y le agrega las dependencias asociadas.
+     * Crea una nova instància i li agrega les dependències associades
      *
-     * @param name
-     * @param <E>
-     * @return new factory instance
-     * @throws DependencyException
+     * @param name Nom objecte
      */
-    private <E> Object makeFactory(Class<E> name) throws DependencyException {
+    private <E> Object getFactory(Class<E> name) throws DependencyException {
         try {
             complex.Factory<?> creator;
             creator = this.factories.get(name);
-            Object[] str1 = new Object[this.dependencies.get(name).length];
-            for (int i = 0; i < this.dependencies.get(name).length; i++) {
-                str1[i] = this.getObject(this.dependencies.get(name)[i]);
-            }
-            return creator.create(str1);
+
+            Object[] dependenciesList = getDependencies(this.dependencies.get(name));
+            Object factoryInstance = creator.create(dependenciesList);
+
+            return factoryInstance;
         } catch (DependencyException ex) {
             throw new DependencyException(ex);
         }
     }
 
     /**
-     *  Crea la instancia del factory, la añade en constants y elimina factory de singletons.
+     * Crea la instància de factory, l'afegeix a constants i elimina factory de singletons.
      *
-     * @param name
-     * @param <E>
-     * @return new factory instance
-     * @throws DependencyException
+     * @param name Nom objecte
      */
     private <E> Object getSingleton(Class<E> name) throws DependencyException {
         try {
             complex.Factory<?> creator;
             creator = this.singletons.get(name);
-            Object[] str1 = new Object[this.dependencies.get(name).length];
-            for (int i=0; i<this.dependencies.get(name).length; i++){
-                str1[i] = this.getObject(this.dependencies.get(name)[i]);
-            }
-            Object singletonInstance = creator.create(str1);
+
+            Object[] dependenciesList = getDependencies(this.dependencies.get(name));
+            Object singletonInstance = creator.create(dependenciesList);
+
             constants.put(name, singletonInstance);
             singletons.remove(name);
+
             return singletonInstance;
         } catch (DependencyException ex) {
             throw new DependencyException(ex);
@@ -161,19 +154,30 @@ public class Container implements Injector {
     }
 
     /**
+     * Retorna totes les dependències de l'objecte passat com a paràmetre
      *
-     * @param name
-     * @param <E>
-     * @return
-     * @throws DependencyException
+     * @param classes Nom objecte
+     */
+    private Object[] getDependencies(Class<?>[] classes) throws DependencyException {
+        Object[] dependenciesList = new Object[classes.length];
+        for (int i = 0; i < classes.length; i++) {
+            dependenciesList[i] = this.getObject(classes[i]);
+        }
+        return dependenciesList;
+    }
+
+    /**
+     * Indica si hi ha un cicle de dependències
+     *
+     * @param name Nom objecte
      */
     private <E> boolean existsDependenciesCycle(Class<E> name) throws DependencyException {
         return existsDependenciesCycle(name, new ArrayList<>());
     }
 
     /**
-     *  Si se encuentra en constants no habrá ciclo, si no, se comprueba si ya se ha visitado y
-     *   si ninguna de sus dependencias posee un ciclo de dependencias.
+     * Si es troba en constants no hi haurà cicle, si no, es comprova si ja s'ha visitat i
+     * si cap de les seves dependències posseeix un cicle de dependències.
      *
      * @param actualName
      * @param visited
@@ -182,17 +186,17 @@ public class Container implements Injector {
      * @throws DependencyException
      */
     private <E> boolean existsDependenciesCycle(Class<E> actualName, List<Class<E>> visited) throws DependencyException {
-        if(!alreadyRegistered(actualName)){
+        if (!alreadyRegistered(actualName)) {
             throw new DependencyException("Attempted to create an object which doesn't have all dependencies created");
-        }else if(constants.containsKey(actualName)){
+        } else if (constants.containsKey(actualName)) {
             return false;
         }
-        if(visited.contains(actualName)){
+        if (visited.contains(actualName)) {
             return true;
-        }else{
+        } else {
             visited.add(actualName);
-            for(Class<?> dependencyToVisit : dependencies.get(actualName)){
-                if(existsDependenciesCycle((Class<E>) dependencyToVisit, visited)){
+            for (Class<?> dependencyToVisit : dependencies.get(actualName)) {
+                if (existsDependenciesCycle((Class<E>) dependencyToVisit, visited)) {
                     return true;
                 }
             }
