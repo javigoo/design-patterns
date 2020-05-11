@@ -1,11 +1,11 @@
 package simple;
 
 import common.DependencyException;
-import factories.*;
 import implementations.*;
 import interfaces.*;
 import org.junit.Before;
 import org.junit.Test;
+import simple.factories.*;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
