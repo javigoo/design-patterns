@@ -181,20 +181,22 @@ public class SimpleContainerTest {
 
     @Test
     public void correctSingleton() throws DependencyException{
-        injector.registerSingleton("InterfaceD", new simple.factories.FactoryD1());
+        registerConstants();
+        registerSingletons();
 
-        InterfaceD d1 = (InterfaceD) injector.getObject("InterfaceD");
-        InterfaceD d2 = (InterfaceD) injector.getObject("InterfaceD");
-        assertTrue(d1 == d2);
+        InterfaceA a1 = (InterfaceA) injector.getObject("InterfaceA");
+        InterfaceA a2 = (InterfaceA) injector.getObject("InterfaceA");
+        assertTrue(a1 == a2);
     }
 
     @Test
     public void FactoryisnotSingleton() throws DependencyException{
-        injector.registerFactory("InterfaceD", new simple.factories.FactoryD1());
+        registerConstants();
+        registerFactories();
 
-        InterfaceD d1 = (InterfaceD) injector.getObject("InterfaceD");
-        InterfaceD d2 = (InterfaceD) injector.getObject("InterfaceD");
-        assertFalse(d1 == d2);
+        InterfaceA a1 = (InterfaceA) injector.getObject("InterfaceA");
+        InterfaceA a2 = (InterfaceA) injector.getObject("InterfaceA");
+        assertFalse(a1 == a2);
     }
 
     private void registerConstants() throws DependencyException {

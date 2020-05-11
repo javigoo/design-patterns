@@ -180,20 +180,22 @@ public class ComplexContainerTest {
 
     @Test
     public void correctSingleton() throws DependencyException{
-        injector.registerSingleton(InterfaceD.class, new FactoryD1());
+        registerConstants();
+        registerSingletons();
 
-        InterfaceD d1 = (InterfaceD) injector.getObject(InterfaceD.class);
-        InterfaceD d2 = (InterfaceD) injector.getObject(InterfaceD.class);
-        assertTrue(d1 == d2);
+        InterfaceA a1 = injector.getObject(InterfaceA.class);
+        InterfaceA a2 = injector.getObject(InterfaceA.class);
+        assertTrue(a1 == a2);
     }
 
     @Test
     public void FactoryisnotSingleton() throws DependencyException{
-        injector.registerFactory(InterfaceD.class, new FactoryD1());
+        registerConstants();
+        registerFactories();
 
-        InterfaceD d1 = (InterfaceD) injector.getObject(InterfaceD.class);
-        InterfaceD d2 = (InterfaceD) injector.getObject(InterfaceD.class);
-        assertFalse(d1 == d2);
+        InterfaceA a1 = injector.getObject(InterfaceA.class);
+        InterfaceA a2 = injector.getObject(InterfaceA.class);
+        assertFalse(a1 == a2);
     }
 
 
