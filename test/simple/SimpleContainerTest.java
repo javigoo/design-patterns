@@ -10,8 +10,7 @@ import simple.factories.*;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class SimpleContainerTest {
 
@@ -23,7 +22,7 @@ public class SimpleContainerTest {
     }
 
     @Test
-    public void containerFactoryA1() throws DependencyException {
+    public void instanceOfFactoryA1() throws DependencyException {
         registerConstants();
         registerFactories();
 
@@ -36,7 +35,7 @@ public class SimpleContainerTest {
     }
 
     @Test
-    public void containerFactoryB1() throws DependencyException {
+    public void instanceOfFactoryB1() throws DependencyException {
         registerConstants();
         registerFactories();
 
@@ -48,7 +47,7 @@ public class SimpleContainerTest {
     }
 
     @Test
-    public void containerFactoryC1() throws DependencyException {
+    public void instanceOfFactoryC1() throws DependencyException {
         registerConstants();
         registerFactories();
 
@@ -60,7 +59,7 @@ public class SimpleContainerTest {
     }
 
     @Test
-    public void containerFactoryD1() throws DependencyException {
+    public void instanceOfFactoryD1() throws DependencyException {
         registerConstants();
         registerFactories();
 
@@ -186,7 +185,7 @@ public class SimpleContainerTest {
 
         InterfaceA a1 = (InterfaceA) injector.getObject("InterfaceA");
         InterfaceA a2 = (InterfaceA) injector.getObject("InterfaceA");
-        assertTrue(a1 == a2);
+        assertSame(a1, a2);
     }
 
     @Test
@@ -196,7 +195,7 @@ public class SimpleContainerTest {
 
         InterfaceA a1 = (InterfaceA) injector.getObject("InterfaceA");
         InterfaceA a2 = (InterfaceA) injector.getObject("InterfaceA");
-        assertFalse(a1 == a2);
+        assertNotSame(a1, a2);
     }
 
     private void registerConstants() throws DependencyException {

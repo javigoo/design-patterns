@@ -6,7 +6,7 @@ import implementations.ImplementationB1;
 import implementations.ImplementationD1;
 import interfaces.InterfaceD;
 
-public class FactoryB1 implements Factory{
+public class FactoryB1 implements Factory {
     public ImplementationB1 create(Object... parameters) throws DependencyException {
         InterfaceD d;
         try {

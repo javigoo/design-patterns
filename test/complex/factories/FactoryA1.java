@@ -9,7 +9,7 @@ import implementations.ImplementationC1;
 import interfaces.InterfaceB;
 import interfaces.InterfaceC;
 
-public class FactoryA1 implements Factory <ImplementationA1> {
+public class FactoryA1 implements Factory<ImplementationA1> {
     @Override
     public ImplementationA1 create(Object... parameters) throws DependencyException {
         InterfaceB b;

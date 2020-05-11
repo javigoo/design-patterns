@@ -184,7 +184,7 @@ public class ComplexContainerTest {
 
         InterfaceA a1 = injector.getObject(InterfaceA.class);
         InterfaceA a2 = injector.getObject(InterfaceA.class);
-        assertSame(a1,a2);
+        assertSame(a1, a2);
     }
 
     @Test
@@ -194,7 +194,7 @@ public class ComplexContainerTest {
 
         InterfaceA a1 = injector.getObject(InterfaceA.class);
         InterfaceA a2 = injector.getObject(InterfaceA.class);
-        assertNotSame(a1,a2);
+        assertNotSame(a1, a2);
     }
 
 
