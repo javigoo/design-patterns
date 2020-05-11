@@ -1,6 +1,8 @@
 package simple;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import common.DependencyException;
 
@@ -11,14 +13,15 @@ public class Container implements Injector{
     private HashMap<String,simple.Factory> FactoriesMap;
     private HashMap<String,simple.Factory> SingletonMap;
     private HashMap<String,Object> SingletonInstanceMap;
-    private HashMap<String,String[]> dependencesMap;
+    private HashMap<String,String[]> dependenciesMap;
     private boolean DEBUG = true;
 
     public Container(){
         this.registeredObjects = new HashMap<>();
         this.FactoriesMap = new HashMap<>();
         this.SingletonMap = new HashMap<>();
-        this.dependencesMap = new HashMap<>();
+        this.SingletonInstanceMap = new HashMap<>();
+        this.dependenciesMap = new HashMap<>();
     }
 
     public void registerConstant(String name, Object value) throws DependencyException {
@@ -42,7 +45,7 @@ public class Container implements Injector{
             this.FactoriesMap.put(name, creator);
             if (DEBUG) System.out.println("Successfull factory register with FactoryName: '" + name + "'");
             if (DEBUG) System.out.println("Trying to register a factory dependences with FactoryName: '" + name + "'");
-            this.dependencesMap.put(name, parameters);
+            this.dependenciesMap.put(name, parameters);
             if (DEBUG) System.out.println("Successfull dependences register for Factory: '" + name + "'");
         }
     }
@@ -71,7 +74,7 @@ public class Container implements Injector{
             this.SingletonMap.put(name, creator);
             if (DEBUG) System.out.println("Successfull singleton register with SingletonName: '" + name + "'");
             if (DEBUG) System.out.println("Trying to register a singleton dependences with SingletonName: '" + name + "'");
-            this.dependencesMap.put(name, parameters);
+            this.dependenciesMap.put(name, parameters);
             if (DEBUG) System.out.println("Successfull dependences register for Singleton: '" + name + "'");
         }
     }
@@ -84,6 +87,10 @@ public class Container implements Injector{
     }
 
     public Object getObject(String name) throws DependencyException {
+        if(existsDependenciesCycle(name)){
+            throw new DependencyException("Attempted to create an object which belongs to a dependency cycle");
+        }
+
         if (this.registeredObjects.containsKey(name)){
             return this.registeredObjects.get(name);
         }
@@ -100,16 +107,16 @@ public class Container implements Injector{
 
     private Object getSingleton(String name) throws DependencyException {
         try{
-            if (SingletonInstanceMap.get(name)==null){
-                Factory creator;
-                creator = this.SingletonMap.get(name);     
-                Object[] str1 = new Object[this.dependencesMap.get(name).length];
-                for (int i=0; i<this.dependencesMap.get(name).length; i++){
-                    str1[i] = this.getObject(this.dependencesMap.get(name)[i]);
-                }
-                SingletonInstanceMap.put(name, creator.create(str1));
+            Factory creator;
+            creator = this.SingletonMap.get(name);
+            Object[] str1 = new Object[this.dependenciesMap.get(name).length];
+            for (int i=0; i<this.dependenciesMap.get(name).length; i++){
+                str1[i] = this.getObject(this.dependenciesMap.get(name)[i]);
             }
-            return SingletonInstanceMap.get(name);
+            Object singletonInstance = creator.create(str1);
+            registeredObjects.put(name, singletonInstance);
+            SingletonMap.remove(name);
+            return singletonInstance;
         }catch(DependencyException ex){
             if (DEBUG) System.err.println("ERROR: Something whent wrong trying to make '" + name + "' singleton factory");
             throw new DependencyException(ex);
@@ -120,9 +127,9 @@ public class Container implements Injector{
         try{
             Factory creator;
             creator = this.FactoriesMap.get(name);
-            Object[] str1 = new Object[this.dependencesMap.get(name).length];
-            for (int i=0; i<this.dependencesMap.get(name).length; i++){
-                str1[i] = this.getObject(this.dependencesMap.get(name)[i]);
+            Object[] str1 = new Object[this.dependenciesMap.get(name).length];
+            for (int i=0; i<this.dependenciesMap.get(name).length; i++){
+                str1[i] = this.getObject(this.dependenciesMap.get(name)[i]);
             }
             return creator.create(str1);    // Nos retorna una nueva instancia de esa Factory con los parámetros asignados.
         }catch(DependencyException ex){
@@ -130,4 +137,28 @@ public class Container implements Injector{
                 throw new DependencyException(ex);
         }
     }
+
+    private boolean existsDependenciesCycle(String name) throws DependencyException {
+        return existsDependenciesCycle(name, new ArrayList<>());
+    }
+
+    private boolean existsDependenciesCycle(String actualName, List<String> visited) throws DependencyException {
+        if(!alreadyRegistered(actualName)){
+            throw new DependencyException("Attempted to create an object which doesn't have all dependencies created");
+        }else if(registeredObjects.containsKey(actualName)){
+            return false;
+        }
+        if(visited.contains(actualName)){
+            return true;
+        }else{
+            visited.add(actualName);
+            for(String dependencyToVisit : dependenciesMap.get(actualName)){
+                if(existsDependenciesCycle(dependencyToVisit, visited)){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }
