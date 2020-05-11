@@ -1,4 +1,4 @@
-package factories;
+package simple.factories;
 
 import common.DependencyException;
 import simple.Factory;
@@ -6,8 +6,7 @@ import implementations.ImplementationB1;
 import implementations.ImplementationD1;
 import interfaces.InterfaceD;
 
-public class FactoryB1 implements Factory<ImplementationB1> {
-    @Override
+public class FactoryB1 implements Factory{
     public ImplementationB1 create(Object... parameters) throws DependencyException {
         InterfaceD d;
         try {

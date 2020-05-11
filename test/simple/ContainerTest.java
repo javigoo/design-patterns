@@ -1,7 +1,7 @@
 package simple;
 
 import common.DependencyException;
-import factories.*;
+import simple.factories.*;
 import implementations.*;
 import interfaces.*;
 import org.junit.Before;
@@ -30,7 +30,7 @@ public class ContainerTest {
         injector.registerFactory("InterfaceC", new FactoryC1(), "socrates");
         injector.registerFactory("InterfaceD", new FactoryD1(), "cuarentaydos");
 
-        InterfaceA a = injector.getObject("InterfaceA");
+        InterfaceA a = (InterfaceA) injector.getObject("InterfaceA");
         assertThat(a, is(instanceOf(ImplementationA1.class)));
 
         ImplementationA1 a1 = (ImplementationA1) a;
@@ -40,7 +40,9 @@ public class ContainerTest {
 
     @Test
     public void containerFactoryB1() throws DependencyException {
+
         injector.registerConstant(Integer.class, 42);
+        injector.registerConstant("I", 42);
 
         injector.registerFactory(InterfaceB.class, new FactoryB1(), InterfaceD.class);
         injector.registerFactory(InterfaceD.class, new FactoryD1(), Integer.class);

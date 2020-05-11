@@ -1,10 +1,10 @@
-package factories;
+package simple.factories;
 
 import common.DependencyException;
 import simple.Factory;
 import implementations.ImplementationC1;
 
-public class FactoryC1 implements Factory <ImplementationC1> {
+public class FactoryC1 implements Factory {
     @Override
     public ImplementationC1 create(Object... parameters) throws DependencyException {
         String s;
