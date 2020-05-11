@@ -80,8 +80,8 @@ public class Container implements Injector {
     }
 
     /**
-     * Depenent de si el nom està associat a una constant, a una factoria, a un singleton, es retorna
-     * (o es crea, mitjançant el mecanisme explicat anteriorment) l’objecte associat al nom.
+     * Dependiendo de si el nombre esta asociado a una constante, a una factoria, o a un singleton, retorna
+     * ( o se crea, mediante el mecanismo explicado anteriormente) el objeto asociado a name.
      *
      * @param name Nom objecte
      * @throws DependencyException Si el nom no està té enregistrat
@@ -102,10 +102,25 @@ public class Container implements Injector {
         }
     }
 
+    /**
+     * Comprueba si el name se encuentra en alguna de las listas.
+     *
+     * @param name
+     * @param <E>
+     * @return
+     */
     private <E> boolean alreadyRegistered(Class<E> name) {
         return this.constants.containsKey(name) || this.factories.containsKey(name) || this.singletons.containsKey(name);
     }
 
+    /**
+     * Crea una nueva instancia y le agrega las dependencias asociadas.
+     *
+     * @param name
+     * @param <E>
+     * @return new factory instance
+     * @throws DependencyException
+     */
     private <E> Object makeFactory(Class<E> name) throws DependencyException {
         try {
             complex.Factory<?> creator;
@@ -120,6 +135,14 @@ public class Container implements Injector {
         }
     }
 
+    /**
+     *  Crea la instancia del factory, la añade en constants y elimina factory de singletons.
+     *
+     * @param name
+     * @param <E>
+     * @return new factory instance
+     * @throws DependencyException
+     */
     private <E> Object getSingleton(Class<E> name) throws DependencyException {
         try {
             complex.Factory<?> creator;
@@ -137,10 +160,27 @@ public class Container implements Injector {
         }
     }
 
+    /**
+     *
+     * @param name
+     * @param <E>
+     * @return
+     * @throws DependencyException
+     */
     private <E> boolean existsDependenciesCycle(Class<E> name) throws DependencyException {
         return existsDependenciesCycle(name, new ArrayList<>());
     }
 
+    /**
+     *  Si se encuentra en constants no habrá ciclo, si no, se comprueba si ya se ha visitado y
+     *   si ninguna de sus dependencias posee un ciclo de dependencias.
+     *
+     * @param actualName
+     * @param visited
+     * @param <E>
+     * @return true si existe un ciclo de dependencias desde actualName
+     * @throws DependencyException
+     */
     private <E> boolean existsDependenciesCycle(Class<E> actualName, List<Class<E>> visited) throws DependencyException {
         if(!alreadyRegistered(actualName)){
             throw new DependencyException("Attempted to create an object which doesn't have all dependencies created");

@@ -22,6 +22,13 @@ public class Container implements Injector{
         this.dependenciesMap = new HashMap<>();
     }
 
+    /**
+     * Associa el nom al valor, de manera que quan es demani getObject donat el nom, es retornarà aquest valor
+     *
+     * @param name  Nom constant
+     * @param value Valor constant
+     * @throws DependencyException Si ja té una constant enregistrat
+     */
     public void registerConstant(String name, Object value) throws DependencyException {
         // Associa el nom al valor, de manera que quan es demani getObject donat el nom,
         // es retornarà aquest valor
@@ -34,6 +41,16 @@ public class Container implements Injector{
         }
     }
 
+    /**
+     * Associa el nom a la factoria de manera que cada vegada que es demani getObject donat aquest nom,
+     * s’usarà la instància enregistrada de factoria (a la que se li passaran com arguments els objectes creats,
+     * pel mateix contenidor, amb els noms indicats al vector de paràmetres) per a crear la nova instància.
+     *
+     * @param name       Nom factoria
+     * @param creator    Objectes creats
+     * @param parameters Noms objectes
+     * @throws DependencyException Si ja té una factoria enregistrada
+     */
     public void registerFactory(String name, Factory creator, String... parameters) throws DependencyException {
         if (alreadyRegistered(name)){  // Comprueba si el nombre se encuentra en algon HashMap
             if (DEBUG) System.err.println("ERROR: '" + name + "' factory is already registered.");
@@ -48,22 +65,23 @@ public class Container implements Injector{
         }
     }
 
+    /**
+     * Associa el nom a la factoria de manera que quan es demani per primera vegada getObject donat aquest nom,
+     * s’usarà la instància enregistrada de factoria (a la que se li passaran com arguments els objectes creats,
+     * pel mateix contenidor, amb els noms indicats al vector de paràmetres) per a crear la nova instància.
+     *
+     * A partir d’aquest moment, les subseqüents crides a getObject donat aquest nom retornaran la mateixa
+     * instància creada.
+     *
+     * Fixeu-vos que en el moment de fer l’enregistrament no podem crear la instància, doncs podria ser que no
+     * totes les dependències estiguin ja enregistrades.
+     *
+     * @param name          Nom Singleton
+     * @param creator       Objectes creats
+     * @param parameters    Noms objectes
+     * @throws DependencyException Si ja té un singleton enregistrat
+     */
     public void registerSingleton(String name, Factory creator, String... parameters) throws DependencyException {
-        // Associa el nom a la factoria de manera que quan es demani per primera vegada
-        // getObject donat aquest nom,
-        // s’usarà la instància enregistrada de factoria (a la que se li passaran com
-        // arguments els objectes creats,
-        // pel mateix contenidor, amb els noms indicats al vector de paràmetres) per a
-        // crear la nova instància.
-
-        // A partir d’aquest moment, les subseqüents crides a getObject donat aquest nom
-        // retornaran la mateixa
-        // instància creada.
-
-        // Fixeu-vos que en el moment de fer l’enregistrament no podem crear la
-        // instància, doncs podria ser que no
-        // totes les dependències estiguin ja enregistrades.
-
         if (alreadyRegistered(name)){  // Comprueba si el nombre se encuentra en algon HashMap
             if (DEBUG) System.err.println("ERROR: '" + name + "' singleton is already registered.");
             throw new DependencyException(name + " singleton is already registered.");
@@ -77,6 +95,12 @@ public class Container implements Injector{
         }
     }
 
+    /**
+     * Comprueba si el name se encuentra en alguna de las listas.
+     *
+     * @param name
+     * @return
+     */
     private Boolean alreadyRegistered(String name){
         if (this.FactoriesMap.containsKey(name) || this.registeredObjects.containsKey(name) || this.SingletonMap.containsKey(name)){
             return Boolean.TRUE;
@@ -84,6 +108,13 @@ public class Container implements Injector{
         return Boolean.FALSE;
     }
 
+    /**
+     * Dependiendo de si el nombre esta asociado a una constante, a una factoria, o a un singleton, retorna
+     * ( o se crea, mediante el mecanismo explicado anteriormente) el objeto asociado a name.
+     *
+     * @param name Nom objecte
+     * @throws DependencyException Si el nom no està té enregistrat
+     */
     public Object getObject(String name) throws DependencyException {
         if(existsDependenciesCycle(name)){
             throw new DependencyException("Attempted to create an object which belongs to a dependency cycle");
@@ -103,6 +134,13 @@ public class Container implements Injector{
         }        
     }
 
+    /**
+     *  Crea la instancia del factory, la añade en constants y elimina factory de singletons.
+     *
+     * @param name
+     * @return new factory instance
+     * @throws DependencyException
+     */
     private Object getSingleton(String name) throws DependencyException {
         try{
             Factory creator;
@@ -121,6 +159,13 @@ public class Container implements Injector{
         }
     }
 
+    /**
+     * Crea una nueva instancia y le agrega las dependencias asociadas.
+     *
+     * @param name
+     * @return new factory instance
+     * @throws DependencyException
+     */
     private Object makeFactory(String name) throws DependencyException { // Cada vez que pedimos ese nombre, nos crea una instancia de Factory.
         try{
             Factory creator;
@@ -136,10 +181,25 @@ public class Container implements Injector{
         }
     }
 
+    /**
+     *
+     * @param name
+     * @return
+     * @throws DependencyException
+     */
     private boolean existsDependenciesCycle(String name) throws DependencyException {
         return existsDependenciesCycle(name, new ArrayList<>());
     }
 
+    /**
+     *  Si se encuentra en constants no habrá ciclo, si no, se comprueba si ya se ha visitado y
+     *   si ninguna de sus dependencias posee un ciclo de dependencias.
+     *
+     * @param actualName
+     * @param visited
+     * @return true si existe un ciclo de dependencias desde actualName
+     * @throws DependencyException
+     */
     private boolean existsDependenciesCycle(String actualName, List<String> visited) throws DependencyException {
         if(!alreadyRegistered(actualName)){
             throw new DependencyException("Attempted to create an object which doesn't have all dependencies created");
