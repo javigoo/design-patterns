@@ -12,7 +12,6 @@ public class Container implements Injector{
     private HashMap<String,Object> registeredObjects;
     private HashMap<String,simple.Factory> FactoriesMap;
     private HashMap<String,simple.Factory> SingletonMap;
-    private HashMap<String,Object> SingletonInstanceMap;
     private HashMap<String,String[]> dependenciesMap;
     private boolean DEBUG = true;
 
@@ -20,7 +19,6 @@ public class Container implements Injector{
         this.registeredObjects = new HashMap<>();
         this.FactoriesMap = new HashMap<>();
         this.SingletonMap = new HashMap<>();
-        this.SingletonInstanceMap = new HashMap<>();
         this.dependenciesMap = new HashMap<>();
     }
 
