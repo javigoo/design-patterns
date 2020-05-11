@@ -24,7 +24,7 @@ public class Container implements Injector{
     public void registerConstant(String name, Object value) throws DependencyException {
         // Associa el nom al valor, de manera que quan es demani getObject donat el nom,
         // es retornarà aquest valor
-        if (this.registeredObjects.containsKey(name) || this.FactoriesMap.containsKey(name) || this.SingletonMap.containsKey(name)){  // Comprueba si el nombre se encuentra en algon HashMap
+        if (alreadyRegistered(name)){  // Comprueba si el nombre se encuentra en algon HashMap
             if (DEBUG) System.err.println("ERROR: '" + name + "' constant is already registered.");
             throw new DependencyException(name + " constant is already registered.");
         } else{
@@ -34,7 +34,7 @@ public class Container implements Injector{
     }
 
     public void registerFactory(String name, Factory creator, String... parameters) throws DependencyException {
-        if (this.FactoriesMap.containsKey(name) || this.registeredObjects.containsKey(name) || this.SingletonMap.containsKey(name)){  // Comprueba si el nombre se encuentra en algon HashMap
+        if (alreadyRegistered(name)){  // Comprueba si el nombre se encuentra en algon HashMap
             if (DEBUG) System.err.println("ERROR: '" + name + "' factory is already registered.");
             throw new DependencyException(name + " factory is already registered.");
         }else{
@@ -63,7 +63,7 @@ public class Container implements Injector{
         // instància, doncs podria ser que no
         // totes les dependències estiguin ja enregistrades.
 
-        if (this.FactoriesMap.containsKey(name) || this.registeredObjects.containsKey(name) || this.SingletonMap.containsKey(name)){  // Comprueba si el nombre se encuentra en algon HashMap
+        if (alreadyRegistered(name)){  // Comprueba si el nombre se encuentra en algon HashMap
             if (DEBUG) System.err.println("ERROR: '" + name + "' singleton is already registered.");
             throw new DependencyException(name + " singleton is already registered.");
         }else{
@@ -74,6 +74,13 @@ public class Container implements Injector{
             this.dependencesMap.put(name, parameters);
             if (DEBUG) System.out.println("Successfull dependences register for Singleton: '" + name + "'");
         }
+    }
+
+    private Boolean alreadyRegistered(String name){
+        if (this.FactoriesMap.containsKey(name) || this.registeredObjects.containsKey(name) || this.SingletonMap.containsKey(name)){
+            return Boolean.TRUE;
+        }
+        return Boolean.FALSE;
     }
 
     public Object getObject(String name) throws DependencyException {

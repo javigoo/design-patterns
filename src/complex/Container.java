@@ -117,7 +117,7 @@ public class Container implements Injector {
 
     private <E> Object getSingleton(Class<E> name) throws DependencyException {
         try {
-            if (singletons.get(name)==null){
+            if (singletonInstances.get(name)==null){
                 complex.Factory<?> creator;
                 creator = this.singletons.get(name);
                 Object[] str1 = new Object[this.dependencies.get(name).length];
