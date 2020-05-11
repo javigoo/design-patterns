@@ -1,7 +1,10 @@
 package complex;
 
 import common.DependencyException;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class Container implements Injector {
 
@@ -84,6 +87,10 @@ public class Container implements Injector {
      * @throws DependencyException Si el nom no està té enregistrat
      */
     public <E> E getObject(Class<E> name) throws DependencyException {
+        if(existsDependenciesCycle(name)){
+            throw new DependencyException("Attempted to create an object which belongs to a dependency cycle");
+        }
+
         if (this.constants.containsKey(name)) {
             return (E) this.constants.get(name);
         } else if (this.factories.containsKey(name)) {
@@ -129,4 +136,28 @@ public class Container implements Injector {
             throw new DependencyException(ex);
         }
     }
+
+    private <E> boolean existsDependenciesCycle(Class<E> name) throws DependencyException {
+        return existsDependenciesCycle(name, new ArrayList<>());
+    }
+
+    private <E> boolean existsDependenciesCycle(Class<E> actualName, List<Class<E>> visited) throws DependencyException {
+        if(!alreadyRegistered(actualName)){
+            throw new DependencyException("Attempted to create an object which doesn't have all dependencies created");
+        }else if(constants.containsKey(actualName)){
+            return false;
+        }
+        if(visited.contains(actualName)){
+            return true;
+        }else{
+            visited.add(actualName);
+            for(Class<?> dependencyToVisit : dependencies.get(actualName)){
+                if(existsDependenciesCycle((Class<E>) dependencyToVisit, visited)){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }
