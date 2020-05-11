@@ -177,10 +177,6 @@ public class ContainerTest {
     }
 
 
-    // ########################################################################################################
-
-
-
     private void registerConstants() throws DependencyException {
         injector.registerConstant(Integer.class, 42);
         injector.registerConstant(String.class, "El sentido de la vida, el universo y todo lo demas");
@@ -199,18 +195,5 @@ public class ContainerTest {
         injector.registerSingleton(InterfaceC.class, new FactoryC1(), String.class);
         injector.registerSingleton(InterfaceD.class, new FactoryD1(), Integer.class);
     }
-
-
-    // TODO
-    // Repetir test para cada factory (ok)
-    // DependencyException:
-    // • Enregistrar un nom que ja té una constant / factoria / singleton enregistrat (ok)
-    // • Intentar crear un objecte sota un nom no enregistrat (ok)
-    // • Intentar crear un objecte que no té totes les seves dependències enregistrades
-    // • Intentar crear un objecte que forma part d’un cicle de dependències. Per simplificar, la detecció de
-    //   cicles es realitzarà en el mètode getObject.
-    // • Passar a una factoria un objecte d’un tipus inadequat per a ser utilitzar al constructor de la classe.
-    // Comprobar ciclos de dependencies}
-    // Test singleton
 
 }
