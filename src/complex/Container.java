@@ -8,14 +8,12 @@ public class Container implements Injector {
     private HashMap<Class<?>, Object> constants;
     private HashMap<Class<?>, complex.Factory<?>> factories;
     private HashMap<Class<?>, complex.Factory<?>> singletons;
-    private HashMap<Class<?>, Object> singletonInstances;
     private HashMap<Class<?>, Class<?>[]> dependencies;
 
     public Container() {
         this.constants = new HashMap<>();
         this.factories = new HashMap<>();
         this.singletons = new HashMap<>();
-        this.singletonInstances = new HashMap<>();
         this.dependencies = new HashMap<>();
 
     }
@@ -117,16 +115,16 @@ public class Container implements Injector {
 
     private <E> Object getSingleton(Class<E> name) throws DependencyException {
         try {
-            if (singletonInstances.get(name)==null){
-                complex.Factory<?> creator;
-                creator = this.singletons.get(name);
-                Object[] str1 = new Object[this.dependencies.get(name).length];
-                for (int i=0; i<this.dependencies.get(name).length; i++){
-                    str1[i] = this.getObject(this.dependencies.get(name)[i]);
-                }
-                singletonInstances.put(name, creator.create(str1));
+            complex.Factory<?> creator;
+            creator = this.singletons.get(name);
+            Object[] str1 = new Object[this.dependencies.get(name).length];
+            for (int i=0; i<this.dependencies.get(name).length; i++){
+                str1[i] = this.getObject(this.dependencies.get(name)[i]);
             }
-            return singletonInstances.get(name);
+            Object singletonInstance = creator.create(str1);
+            constants.put(name, singletonInstance);
+            singletons.remove(name);
+            return singletonInstance;
         } catch (DependencyException ex) {
             throw new DependencyException(ex);
         }
