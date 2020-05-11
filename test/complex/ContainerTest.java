@@ -132,12 +132,6 @@ public class ContainerTest {
         injector.registerSingleton(InterfaceD.class, new FactoryD1(), Integer.class);
     }
 
-
-
-    // ########################################################################################################
-
-
-
     @Test(expected = DependencyException.class)
     public void getObjectNotRegisteredName() throws DependencyException{
         injector.getObject(InterfaceA.class);
@@ -146,12 +140,14 @@ public class ContainerTest {
     @Test(expected = DependencyException.class)
     public void getObjectNotRegisteredDependenciesFactory() throws DependencyException{
         injector.registerFactory(InterfaceD.class, new FactoryD1(), Integer.class);
+
         injector.getObject(InterfaceD.class);
     }
 
     @Test(expected = DependencyException.class)
     public void getObjectNotRegisteredDependenciesSingleton() throws DependencyException{
         injector.registerSingleton(InterfaceD.class, new FactoryD1(), Integer.class);
+
         injector.getObject(InterfaceD.class);
     }
 
@@ -159,10 +155,26 @@ public class ContainerTest {
     public void registerFactoryWithBadArguments() throws DependencyException{
         injector.registerConstant(Integer.class, 0);
         injector.registerFactory(InterfaceD.class, new FactoryD1(), String.class);
+
         injector.getObject(InterfaceD.class);
     }
 
+    @Test(expected = DependencyException.class)
+    public void registerSingletonWithBadArguments() throws DependencyException{
+        injector.registerConstant(Integer.class, 0);
+        injector.registerSingleton(InterfaceD.class, new FactoryD1(), String.class);
 
+        injector.getObject(InterfaceD.class);
+    }
+
+    @Test(expected = DependencyException.class)
+    public void getObjectWithDependencyCycle() throws DependencyException{
+        injector.registerFactory(InterfaceA.class, new FactoryA1(), InterfaceB.class, InterfaceC.class);
+        injector.registerFactory(InterfaceD.class, new FactoryD1(), InterfaceA.class);
+        injector.registerSingleton(InterfaceC.class, new FactoryC1(), InterfaceD.class);
+
+        injector.getObject(InterfaceA.class);
+    }
 
 
     // ########################################################################################################
