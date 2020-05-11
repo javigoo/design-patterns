@@ -88,7 +88,7 @@ public class Container implements Injector {
      */
     public <E> E getObject(Class<E> name) throws DependencyException {
         if (existsDependenciesCycle(name)) {
-            throw new DependencyException("Attempted to create an object which belongs to a dependency cycle");
+            throw new DependencyException("S'ha intentat crear un objecte que pertany a un cicle de dependencia");
         }
 
         if (this.constants.containsKey(name)) {
@@ -110,7 +110,6 @@ public class Container implements Injector {
     private <E> boolean alreadyRegistered(Class<E> name) {
         return this.constants.containsKey(name) || this.factories.containsKey(name) || this.singletons.containsKey(name);
     }
-
 
     /**
      * Crea una nova instància i li agrega les dependències associades
@@ -184,7 +183,7 @@ public class Container implements Injector {
      */
     private <E> boolean existsDependenciesCycle(Class<E> actualName, List<Class<E>> visited) throws DependencyException {
         if (!alreadyRegistered(actualName)) {
-            throw new DependencyException("Attempted to create an object which doesn't have all dependencies created");
+            throw new DependencyException("S'ha intentat crear un objecte que no ha creat totes les dependencies");
         } else if (constants.containsKey(actualName)) {
             return false;
         }
@@ -192,8 +191,8 @@ public class Container implements Injector {
             return true;
         } else {
             visited.add(actualName);
-            for (Class<?> dependencyToVisit : dependencies.get(actualName)) {
-                if (existsDependenciesCycle((Class<E>) dependencyToVisit, visited)) {
+            for (Class<?> dependenciesToVisit : dependencies.get(actualName)) {
+                if (existsDependenciesCycle((Class<E>) dependenciesToVisit, visited)) {
                     return true;
                 }
             }

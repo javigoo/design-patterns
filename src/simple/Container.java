@@ -1,25 +1,24 @@
 package simple;
 
+import common.DependencyException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import common.DependencyException;
-
 public class Container implements Injector{
 
     
-    private HashMap<String,Object> registeredObjects;
-    private HashMap<String,simple.Factory> FactoriesMap;
-    private HashMap<String,simple.Factory> SingletonMap;
-    private HashMap<String,String[]> dependenciesMap;
-    private boolean DEBUG = true;
+    private HashMap<String,Object> constants;
+    private HashMap<String,simple.Factory> factories;
+    private HashMap<String,simple.Factory> singletons;
+    private HashMap<String,String[]> dependencies;
 
     public Container(){
-        this.registeredObjects = new HashMap<>();
-        this.FactoriesMap = new HashMap<>();
-        this.SingletonMap = new HashMap<>();
-        this.dependenciesMap = new HashMap<>();
+        this.constants = new HashMap<>();
+        this.factories = new HashMap<>();
+        this.singletons = new HashMap<>();
+        this.dependencies = new HashMap<>();
     }
 
     /**
@@ -30,14 +29,10 @@ public class Container implements Injector{
      * @throws DependencyException Si ja té una constant enregistrat
      */
     public void registerConstant(String name, Object value) throws DependencyException {
-        // Associa el nom al valor, de manera que quan es demani getObject donat el nom,
-        // es retornarà aquest valor
-        if (alreadyRegistered(name)){  // Comprueba si el nombre se encuentra en algon HashMap
-            if (DEBUG) System.err.println("ERROR: '" + name + "' constant is already registered.");
-            throw new DependencyException(name + " constant is already registered.");
+        if (alreadyRegistered(name)){
+            throw new DependencyException(name + " ja té una constant enregistrada");
         } else{
-            this.registeredObjects.put(name, value);
-            if (DEBUG) System.out.println("Key '" + name + "' registered with value '" + value + "'");
+            this.constants.put(name, value);
         }
     }
 
@@ -52,16 +47,11 @@ public class Container implements Injector{
      * @throws DependencyException Si ja té una factoria enregistrada
      */
     public void registerFactory(String name, Factory creator, String... parameters) throws DependencyException {
-        if (alreadyRegistered(name)){  // Comprueba si el nombre se encuentra en algon HashMap
-            if (DEBUG) System.err.println("ERROR: '" + name + "' factory is already registered.");
-            throw new DependencyException(name + " factory is already registered.");
+        if (alreadyRegistered(name)){
+            throw new DependencyException(name + " ja té una factoria enregistrada");
         }else{
-            if (DEBUG) System.out.println("Trying to register a factory with name: '" + name + "'");
-            this.FactoriesMap.put(name, creator);
-            if (DEBUG) System.out.println("Successfull factory register with FactoryName: '" + name + "'");
-            if (DEBUG) System.out.println("Trying to register a factory dependences with FactoryName: '" + name + "'");
-            this.dependenciesMap.put(name, parameters);
-            if (DEBUG) System.out.println("Successfull dependences register for Factory: '" + name + "'");
+            this.factories.put(name, creator);
+            this.dependencies.put(name, parameters);
         }
     }
 
@@ -82,31 +72,14 @@ public class Container implements Injector{
      * @throws DependencyException Si ja té un singleton enregistrat
      */
     public void registerSingleton(String name, Factory creator, String... parameters) throws DependencyException {
-        if (alreadyRegistered(name)){  // Comprueba si el nombre se encuentra en algon HashMap
-            if (DEBUG) System.err.println("ERROR: '" + name + "' singleton is already registered.");
-            throw new DependencyException(name + " singleton is already registered.");
+        if (alreadyRegistered(name)){
+            throw new DependencyException(name + " ja té un singleton enregistrat");
         }else{
-            if (DEBUG) System.out.println("Trying to register a factory like Singleton with name: '" + name + "'");
-            this.SingletonMap.put(name, creator);
-            if (DEBUG) System.out.println("Successfull singleton register with SingletonName: '" + name + "'");
-            if (DEBUG) System.out.println("Trying to register a singleton dependences with SingletonName: '" + name + "'");
-            this.dependenciesMap.put(name, parameters);
-            if (DEBUG) System.out.println("Successfull dependences register for Singleton: '" + name + "'");
+            this.singletons.put(name, creator);
+            this.dependencies.put(name, parameters);
         }
     }
 
-    /**
-     * Comprueba si el name se encuentra en alguna de las listas.
-     *
-     * @param name
-     * @return
-     */
-    private Boolean alreadyRegistered(String name){
-        if (this.FactoriesMap.containsKey(name) || this.registeredObjects.containsKey(name) || this.SingletonMap.containsKey(name)){
-            return Boolean.TRUE;
-        }
-        return Boolean.FALSE;
-    }
 
     /**
      * Dependiendo de si el nombre esta asociado a una constante, a una factoria, o a un singleton, retorna
@@ -117,100 +90,113 @@ public class Container implements Injector{
      */
     public Object getObject(String name) throws DependencyException {
         if(existsDependenciesCycle(name)){
-            throw new DependencyException("Attempted to create an object which belongs to a dependency cycle");
+            throw new DependencyException("S'ha intentat crear un objecte que pertany a un cicle de dependencia");
         }
 
-        if (this.registeredObjects.containsKey(name)){
-            return this.registeredObjects.get(name);
+        if (this.constants.containsKey(name)){
+            return this.constants.get(name);
         }
-        else if(this.FactoriesMap.containsKey(name)){
-            return this.makeFactory(name);            
+        else if(this.factories.containsKey(name)){
+            return this.getFactory(name);
         }
-        else if(this.SingletonMap.containsKey(name)){
+        else if(this.singletons.containsKey(name)){
             return this.getSingleton(name);            
         }
         else{
-            throw new DependencyException(name + " has not been registered.");
+            throw new DependencyException(name + " no enregistrat");
         }        
     }
 
     /**
-     *  Crea la instancia del factory, la añade en constants y elimina factory de singletons.
+     * Comprueba si el name se encuentra en alguna de las listas.
      *
-     * @param name
-     * @return new factory instance
-     * @throws DependencyException
+     * @param name Nom objecte
      */
-    private Object getSingleton(String name) throws DependencyException {
-        try{
-            Factory creator;
-            creator = this.SingletonMap.get(name);
-            Object[] str1 = new Object[this.dependenciesMap.get(name).length];
-            for (int i=0; i<this.dependenciesMap.get(name).length; i++){
-                str1[i] = this.getObject(this.dependenciesMap.get(name)[i]);
-            }
-            Object singletonInstance = creator.create(str1);
-            registeredObjects.put(name, singletonInstance);
-            SingletonMap.remove(name);
-            return singletonInstance;
-        }catch(DependencyException ex){
-            if (DEBUG) System.err.println("ERROR: Something whent wrong trying to make '" + name + "' singleton factory");
-            throw new DependencyException(ex);
-        }
+    private Boolean alreadyRegistered(String name){
+        return this.factories.containsKey(name) || this.constants.containsKey(name) || this.singletons.containsKey(name);
     }
 
     /**
-     * Crea una nueva instancia y le agrega las dependencias asociadas.
+     * Crea una nova instància i li agrega les dependències associades
      *
-     * @param name
-     * @return new factory instance
-     * @throws DependencyException
+     * @param name Nom objecte
      */
-    private Object makeFactory(String name) throws DependencyException { // Cada vez que pedimos ese nombre, nos crea una instancia de Factory.
+    private Object getFactory(String name) throws DependencyException {
         try{
             Factory creator;
-            creator = this.FactoriesMap.get(name);
-            Object[] str1 = new Object[this.dependenciesMap.get(name).length];
-            for (int i=0; i<this.dependenciesMap.get(name).length; i++){
-                str1[i] = this.getObject(this.dependenciesMap.get(name)[i]);
-            }
-            return creator.create(str1);    // Nos retorna una nueva instancia de esa Factory con los parámetros asignados.
+            creator = this.factories.get(name);
+
+            Object[] dependenciesList = getDependencies(this.dependencies.get(name));
+            Object factoryInstance = creator.create(dependenciesList);
+
+            return factoryInstance;
         }catch(DependencyException ex){
-                if (DEBUG) System.err.println("ERROR: Something whent wrong trying to make '" + name + "' factory");
                 throw new DependencyException(ex);
         }
     }
 
     /**
+     *  Crea la instància de factory, l'afegeix a constants i elimina factory de singletons.
      *
-     * @param name
-     * @return
-     * @throws DependencyException
+     * @param name Nom objecte
+     */
+    private Object getSingleton(String name) throws DependencyException {
+        try{
+            Factory creator;
+            creator = this.singletons.get(name);
+
+            Object[] dependenciesList = getDependencies(this.dependencies.get(name));
+            Object singletonInstance = creator.create(dependenciesList);
+
+            constants.put(name, singletonInstance);
+            singletons.remove(name);
+
+            return singletonInstance;
+        }catch(DependencyException ex){
+            throw new DependencyException(ex);
+        }
+    }
+
+    /**
+     * Retorna totes les dependències de l'objecte passat com a paràmetre
+     *
+     * @param classes Nom objecte
+     */
+    private Object[] getDependencies(String[] classes) throws DependencyException {
+        Object[] dependenciesList = new Object[classes.length];
+        for (int i = 0; i < classes.length; i++) {
+            dependenciesList[i] = this.getObject(classes[i]);
+        }
+        return dependenciesList;
+    }
+
+    /**
+     * Indica si hi ha un cicle de dependències
+     *
+     * @param name Nom objecte
      */
     private boolean existsDependenciesCycle(String name) throws DependencyException {
         return existsDependenciesCycle(name, new ArrayList<>());
     }
 
     /**
-     *  Si se encuentra en constants no habrá ciclo, si no, se comprueba si ya se ha visitado y
-     *   si ninguna de sus dependencias posee un ciclo de dependencias.
+     * Si es troba en constants no hi haurà cicle, si no, es comprova si ja s'ha visitat i
+     * si cap de les seves dependències posseeix un cicle de dependències.
      *
-     * @param actualName
-     * @param visited
-     * @return true si existe un ciclo de dependencias desde actualName
-     * @throws DependencyException
+     * @param actualName Nom objecte actual
+     * @param visited Objectes visitats
      */
     private boolean existsDependenciesCycle(String actualName, List<String> visited) throws DependencyException {
         if(!alreadyRegistered(actualName)){
-            throw new DependencyException("Attempted to create an object which doesn't have all dependencies created");
-        }else if(registeredObjects.containsKey(actualName)){
+            throw new DependencyException("S'ha intentat crear un objecte que no ha creat totes les dependencies");
+        }else if(constants.containsKey(actualName)){
             return false;
         }
         if(visited.contains(actualName)){
             return true;
         }else{
             visited.add(actualName);
-            for(String dependencyToVisit : dependenciesMap.get(actualName)){
+            for(String dependencyToVisit : dependencies.get(actualName)){
                 if(existsDependenciesCycle(dependencyToVisit, visited)){
                     return true;
                 }
