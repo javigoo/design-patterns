@@ -179,7 +179,7 @@ public class Container implements Injector {
      * si cap de les seves dependències posseeix un cicle de dependències.
      *
      * @param actualName Nom objecte actual
-     * @param visited Objectes visitats
+     * @param visited    Objectes visitats
      */
     private <E> boolean existsDependenciesCycle(Class<E> actualName, List<Class<E>> visited) throws DependencyException {
         if (!alreadyRegistered(actualName)) {

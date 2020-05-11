@@ -10,8 +10,7 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class ComplexContainerTest {
 
@@ -72,7 +71,7 @@ public class ComplexContainerTest {
     }
 
     @Test
-    public void instanceOfFactoryA1Singleton() throws DependencyException{
+    public void instanceOfFactoryA1Singleton() throws DependencyException {
         registerConstants();
         registerSingletons();
 
@@ -84,7 +83,7 @@ public class ComplexContainerTest {
     }
 
     @Test
-    public void instanceOfFactoryB1Singleton() throws DependencyException{
+    public void instanceOfFactoryB1Singleton() throws DependencyException {
         registerConstants();
         registerSingletons();
 
@@ -95,18 +94,18 @@ public class ComplexContainerTest {
     }
 
     @Test
-    public void instanceOfFactoryC1Singleton() throws DependencyException{
+    public void instanceOfFactoryC1Singleton() throws DependencyException {
         registerConstants();
         registerSingletons();
 
         InterfaceC c = injector.getObject(InterfaceC.class);
         assertThat(c, is(instanceOf(ImplementationC1.class)));
         ImplementationC1 c1 = (ImplementationC1) c;
-        assertThat(c1.s,is("El sentido de la vida, el universo y todo lo demas"));
+        assertThat(c1.s, is("El sentido de la vida, el universo y todo lo demas"));
     }
 
     @Test
-    public void instanceOfFactoryD1Singleton() throws DependencyException{
+    public void instanceOfFactoryD1Singleton() throws DependencyException {
         registerConstants();
         registerSingletons();
 
@@ -117,44 +116,44 @@ public class ComplexContainerTest {
     }
 
     @Test(expected = DependencyException.class)
-    public void alreadyRegisteredConstant() throws DependencyException{
+    public void alreadyRegisteredConstant() throws DependencyException {
         injector.registerConstant(Integer.class, 0);
         injector.registerConstant(Integer.class, 0);
     }
 
     @Test(expected = DependencyException.class)
-    public void alreadyRegisteredFactory() throws DependencyException{
+    public void alreadyRegisteredFactory() throws DependencyException {
         injector.registerFactory(InterfaceD.class, new FactoryD1(), Integer.class);
         injector.registerFactory(InterfaceD.class, new FactoryD1(), Integer.class);
     }
 
     @Test(expected = DependencyException.class)
-    public void alreadyRegisteredSingleton() throws DependencyException{
+    public void alreadyRegisteredSingleton() throws DependencyException {
         injector.registerSingleton(InterfaceD.class, new FactoryD1(), Integer.class);
         injector.registerSingleton(InterfaceD.class, new FactoryD1(), Integer.class);
     }
 
     @Test(expected = DependencyException.class)
-    public void getObjectNotRegisteredName() throws DependencyException{
+    public void getObjectNotRegisteredName() throws DependencyException {
         injector.getObject(InterfaceA.class);
     }
 
     @Test(expected = DependencyException.class)
-    public void getObjectNotRegisteredDependenciesFactory() throws DependencyException{
+    public void getObjectNotRegisteredDependenciesFactory() throws DependencyException {
         injector.registerFactory(InterfaceD.class, new FactoryD1(), Integer.class);
 
         injector.getObject(InterfaceD.class);
     }
 
     @Test(expected = DependencyException.class)
-    public void getObjectNotRegisteredDependenciesSingleton() throws DependencyException{
+    public void getObjectNotRegisteredDependenciesSingleton() throws DependencyException {
         injector.registerSingleton(InterfaceD.class, new FactoryD1(), Integer.class);
 
         injector.getObject(InterfaceD.class);
     }
 
     @Test(expected = DependencyException.class)
-    public void registerFactoryWithBadArguments() throws DependencyException{
+    public void registerFactoryWithBadArguments() throws DependencyException {
         injector.registerConstant(Integer.class, 0);
         injector.registerFactory(InterfaceD.class, new FactoryD1(), String.class);
 
@@ -162,7 +161,7 @@ public class ComplexContainerTest {
     }
 
     @Test(expected = DependencyException.class)
-    public void registerSingletonWithBadArguments() throws DependencyException{
+    public void registerSingletonWithBadArguments() throws DependencyException {
         injector.registerConstant(Integer.class, 0);
         injector.registerSingleton(InterfaceD.class, new FactoryD1(), String.class);
 
@@ -170,7 +169,7 @@ public class ComplexContainerTest {
     }
 
     @Test(expected = DependencyException.class)
-    public void getObjectWithDependencyCycle() throws DependencyException{
+    public void getObjectWithDependencyCycle() throws DependencyException {
         injector.registerFactory(InterfaceA.class, new FactoryA1(), InterfaceB.class, InterfaceC.class);
         injector.registerFactory(InterfaceD.class, new FactoryD1(), InterfaceA.class);
         injector.registerSingleton(InterfaceC.class, new FactoryC1(), InterfaceD.class);
@@ -179,23 +178,23 @@ public class ComplexContainerTest {
     }
 
     @Test
-    public void correctSingleton() throws DependencyException{
+    public void sameInstanceForSingleton() throws DependencyException {
         registerConstants();
         registerSingletons();
 
         InterfaceA a1 = injector.getObject(InterfaceA.class);
         InterfaceA a2 = injector.getObject(InterfaceA.class);
-        assertTrue(a1 == a2);
+        assertSame(a1,a2);
     }
 
     @Test
-    public void FactoryisnotSingleton() throws DependencyException{
+    public void differentInstanceForFactory() throws DependencyException {
         registerConstants();
         registerFactories();
 
         InterfaceA a1 = injector.getObject(InterfaceA.class);
         InterfaceA a2 = injector.getObject(InterfaceA.class);
-        assertFalse(a1 == a2);
+        assertNotSame(a1,a2);
     }
 
 
