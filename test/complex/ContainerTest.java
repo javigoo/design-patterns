@@ -132,11 +132,27 @@ public class ContainerTest {
         injector.registerSingleton(InterfaceD.class, new FactoryD1(), Integer.class);
     }
 
+
+
+    // ########################################################################################################
+
+
+
     @Test(expected = DependencyException.class)
     public void getObjectNotRegisteredName() throws DependencyException{
-        injector.registerConstant(String.class, "El sentido de la vida, el universo y todo lo demas");
-        injector.registerFactory(InterfaceA.class, new FactoryA1(), InterfaceB.class, InterfaceC.class);
         injector.getObject(InterfaceA.class);
+    }
+
+    @Test(expected = DependencyException.class)
+    public void getObjectNotRegisteredDependenciesFactory() throws DependencyException{
+        injector.registerFactory(InterfaceD.class, new FactoryD1(), Integer.class);
+        injector.getObject(InterfaceD.class);
+    }
+
+    @Test(expected = DependencyException.class)
+    public void getObjectNotRegisteredDependenciesSingleton() throws DependencyException{
+        injector.registerSingleton(InterfaceD.class, new FactoryD1(), Integer.class);
+        injector.getObject(InterfaceD.class);
     }
 
     @Test(expected = DependencyException.class)
@@ -145,6 +161,13 @@ public class ContainerTest {
         injector.registerFactory(InterfaceD.class, new FactoryD1(), String.class);
         injector.getObject(InterfaceD.class);
     }
+
+
+
+
+    // ########################################################################################################
+
+
 
     private void registerConstants() throws DependencyException {
         injector.registerConstant(Integer.class, 42);
