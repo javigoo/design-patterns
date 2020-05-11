@@ -10,6 +10,8 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class ContainerTest {
 
@@ -174,6 +176,24 @@ public class ContainerTest {
         injector.registerSingleton(InterfaceC.class, new FactoryC1(), InterfaceD.class);
 
         injector.getObject(InterfaceA.class);
+    }
+
+    @Test
+    public void correctSingleton() throws DependencyException{
+        injector.registerSingleton(InterfaceD.class, new FactoryD1());
+
+        InterfaceD d1 = (InterfaceD) injector.getObject(InterfaceD.class);
+        InterfaceD d2 = (InterfaceD) injector.getObject(InterfaceD.class);
+        assertTrue(d1 == d2);
+    }
+
+    @Test
+    public void FactoryisnotSingleton() throws DependencyException{
+        injector.registerFactory(InterfaceD.class, new FactoryD1());
+
+        InterfaceD d1 = (InterfaceD) injector.getObject(InterfaceD.class);
+        InterfaceD d2 = (InterfaceD) injector.getObject(InterfaceD.class);
+        assertFalse(d1 == d2);
     }
 
 

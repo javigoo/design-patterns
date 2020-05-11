@@ -10,6 +10,8 @@ import simple.factories.*;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class ContainerTest {
 
@@ -177,6 +179,23 @@ public class ContainerTest {
         injector.getObject("InterfaceA");
     }
 
+    @Test
+    public void correctSingleton() throws DependencyException{
+        injector.registerSingleton("InterfaceD", new simple.factories.FactoryD1());
+
+        InterfaceD d1 = (InterfaceD) injector.getObject("InterfaceD");
+        InterfaceD d2 = (InterfaceD) injector.getObject("InterfaceD");
+        assertTrue(d1 == d2);
+    }
+
+    @Test
+    public void FactoryisnotSingleton() throws DependencyException{
+        injector.registerFactory("InterfaceD", new simple.factories.FactoryD1());
+
+        InterfaceD d1 = (InterfaceD) injector.getObject("InterfaceD");
+        InterfaceD d2 = (InterfaceD) injector.getObject("InterfaceD");
+        assertFalse(d1 == d2);
+    }
 
     private void registerConstants() throws DependencyException {
         injector.registerConstant("Integer", 42);
